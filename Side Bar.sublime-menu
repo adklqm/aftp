@@ -1,16 +1,18 @@
 [
-	{ "caption": "-" },
-	{
-		"caption": "FTP/FTP",
-		"children":
-		[
-			{ "caption": "Upload File", "command": "ftp_upload_file", "args": {"paths": []} },
-			{ "caption": "Download File", "command": "ftp_download_file", "args": {"paths": []} },
-			{ "caption": "-" },
-			{ "caption": "Upload Folder", "command": "ftp_upload_folder", "args": {"paths": []} },
-			{ "caption": "Download Folder", "command": "ftp_download_folder", "args": {"paths": []} },
-			{ "caption": "-" },
-			{ "caption": "Diff Remote File", "command": "ftp_diff_remote_file", "args": {"paths": []} }
-		]
-	}
+    { "caption": "-" },
+    {
+        "caption": "FTP",
+        "children":
+        [
+            { "caption": "Upload File", "command": "ftp_upload_file", "args": {"paths": []} },
+            { "caption": "Download File", "command": "ftp_download_file", "args": {"paths": []} },
+            { "caption": "-" },
+            { "caption": "Upload Folder", "command": "ftp_upload_folder", "args": {"paths": []} },
+            { "caption": "Download Folder", "command": "ftp_download_folder", "args": {"paths": []} },
+            { "caption": "-" },
+            { "caption": "Diff Remote File", "command": "ftp_diff_remote_file", "args": {"paths": []} },
+            { "caption": "-" },
+            { "caption": "Map to Remote...", "command": "ftp_map_to_remote" }
+        ]
+    }
 ]

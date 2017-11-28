@@ -1,13 +1,15 @@
 [
-	{ "caption": "-" },
-	{
-		"caption": "FTP/SFTP",
-		"children":
-		[
-			{ "caption": "Upload File", "command": "ftp_upload_file" },
-			{ "caption": "Download File", "command": "ftp_download_file" },
-			{ "caption": "-" },
-			{ "caption": "Diff Remote File", "command": "ftp_diff_remote_file" }
-		]
-	}
+    { "caption": "-" },
+    {
+        "caption": "FTP",
+        "children":
+        [
+            { "caption": "Upload File", "command": "ftp_upload_file" },
+            { "caption": "Download File", "command": "ftp_download_file" },
+            { "caption": "-" },
+            { "caption": "Diff Remote File", "command": "ftp_diff_remote_file" },
+            { "caption": "-" },
+            { "caption": "Map to Remote...", "command": "ftp_map_to_remote" }
+        ]
+    }
 ]

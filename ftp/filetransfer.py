@@ -1,4 +1,5 @@
 #coding:utf-8
+
 from ctypes import *
 import os   
 import sys   
@@ -8,14 +9,16 @@ import logging
 
 class FileTransfer:
 
-    ftp     = ftplib.FTP()   
+    ftp     = ftplib.FTP()
     bIsDir  = False  
     path    = ""
 
     def __init__( self, host, port = 21 ):
-        #打开调试,级别0,1,2。2显示详细信息   
+        #Open debug,level's val with 0,1,2.   
         self.ftp.set_debuglevel(2)
-        self.ftp.set_pasv(0)  #0主动模式 1 #被动模式   
+        #0 active mode, 1 passive
+        self.ftp.set_pasv(0)
+        #Connect host
         self.ftp.connect( host, port )
 
     def Login( self, user, passwd ): 
@@ -24,11 +27,11 @@ class FileTransfer:
     def DownLoadFile( self, LocalFile, RemoteFile ):
         file_handler = open( LocalFile, 'wb' )
         self.ftp.retrbinary( "RETR %s" % ( RemoteFile ), file_handler.write )    
-        file_handler.close()  
-        return True  
+        file_handler.close()
+        return True
 
     def UpLoadFile( self, LocalFile, RemoteFile ):  
-        if os.path.isfile( LocalFile ) == False:  
+        if False == os.path.isfile( LocalFile ):  
             return False
 
           
@@ -38,7 +41,7 @@ class FileTransfer:
         return True  
 
     def UpLoadFolder( self, LocalDir, RemoteDir ): 
-        if os.path.isdir( LocalDir ) == False:  
+        if False == os.path.isdir( LocalDir ):  
             return False
         LocalNames = os.listdir( LocalDir )
         self.ftp.cwd( RemoteDir )   
@@ -52,7 +55,7 @@ class FileTransfer:
         return  
 
     def DownLoadFolder( self, LocalDir, RemoteDir ): 
-        if os.path.isdir( LocalDir ) == False:  
+        if False == os.path.isdir( LocalDir ):
             os.makedirs( LocalDir )
         self.ftp.cwd( RemoteDir )   
         RemoteNames = self.ftp.nlst()  
