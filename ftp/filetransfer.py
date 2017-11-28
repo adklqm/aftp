@@ -85,8 +85,6 @@ class FileTransfer:
     def close( self ): 
         self.ftp.quit()  
 
-# ftp = FileTransfer('60.205.34.229')  
-# ftp.Login('bxu2442520634','911208Lqmadk')
 # ftp.close()
 # ftp.DownLoadFile('test.txt', '/htdocs/test.txt')#ok   
 # ftp.UpLoadFile('test.txt', '/htdocs/test.txt')#ok   
