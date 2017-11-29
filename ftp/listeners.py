@@ -7,8 +7,7 @@ class FtpAutoConnectListener(sublime_plugin.EventListener):
     #Called just before a view is saved.
     def on_pre_save(self,edit):
         w = sublime.active_window()
-        print(22)
-
+        pass
 
     #Called just after a view is saved.
     def on_post_save(self,edit):

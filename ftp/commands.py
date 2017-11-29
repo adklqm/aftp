@@ -7,29 +7,31 @@ import  json
 import  ftplib
 import  re
 
+#Instance of Ftp
 FTP         = False
-LOCALPATH   = False
+#It is a path for ftp-config.json
+CONFIG_PATH = False
 
 def getFtp(path):
     global FTP
-    global LOCALPATH
+    global CONFIG_PATH
 
-    tmp = getLocalPath(path)
+    tmp = getConfigPath(path)
     if len(tmp) < 1:
-        LOCALPATH = False
+        CONFIG_PATH = False
         if False != FTP:
             FTP.close()
             FTP = False
             return
 
-    if tmp != LOCALPATH:
-        LOCALPATH = tmp
+    if tmp != CONFIG_PATH:
+        CONFIG_PATH = tmp
         if FTP != False:
             FTP.close()
             FTP = False
 
     if False == FTP:
-        config = getConfig(path)
+        config = getConfig()
         if len(config) < 1:
             return
         FTP = Ftp(config['host'])
@@ -39,22 +41,14 @@ def getFtp(path):
             FTP = False
 
 
-def getConfig(path):
-    fileDir = (os.path.split(path))[0]
-    tmp     = ''
-    config 	= ''
-    for x in os.listdir(fileDir):
-        tmp = os.path.join(fileDir,x)
-        if( os.path.isfile(tmp) and "ftp-config.json" == x ):
-            file   = open(tmp,encoding='utf-8')
-            config = json.load(file)
-            return config
-    if(len(fileDir) < 4):
-        return ''
-    return getConfig(fileDir)
+def getConfig():
+    global CONFIG_PATH
+    fp     = open( os.path.join(CONFIG_PATH,'ftp-config.json') ,encoding = 'utf-8')
+    config = json.load(fp)
+    return config
 
 
-def getLocalPath(path):
+def getConfigPath(path):
     fileDir = (os.path.split(path))[0]
     tmp     = ''
     for x in os.listdir(fileDir):
@@ -63,23 +57,24 @@ def getLocalPath(path):
             return fileDir
     if(len(fileDir) < 4):
         return ''
-    return getLocalPath(fileDir)
+    return getConfigPath(fileDir)
 
 
 def getRemotePath(path):
-    global LOCALPATH
-    getLocalPath(path)
-    config = getConfig(path)
+    global CONFIG_PATH
+    getConfigPath(path)
+    config = getConfig()
     if len(config) < 1:
         return
     remotePath = config['remote_path']
+    #If it doesn't end with "/"
     if remotePath[-1] != "/":
         remotePath = remotePath + "/"
 
-    tmp = path.replace(LOCALPATH+"\\",'')
+    tmp = path.replace(CONFIG_PATH + "\\",'')
     tmp = tmp.replace("\\","/")
     remotePath = remotePath + tmp
-
+    print(remotePath)
     return remotePath
 
 
@@ -150,9 +145,14 @@ class FtpDownloadFileCommand(sublime_plugin.TextCommand):
 
 class FtpUploadFolderCommand(sublime_plugin.TextCommand):
     def run(self,edit,**args):
-        filePath = args['paths'][0]
-        fileDir	 = (os.path.split(filePath))[0]
-        print(os.listdir(fileDir))
+        path = args['paths'][0]
+        getFtp(path)
+        global FTP
+        if(FTP == False):
+            return
+
+        FTP.UpLoadFolder(path,getRemotePath(path))
+
 
     #命令是否可用
     def is_enabled(self,**args):

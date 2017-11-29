@@ -11,7 +11,7 @@ import json
 # Get path of current dir. d[0] is a directory and d[1] is a file name
 dir_arr = os.path.split(__file__)
 # Get default config
-fp = open(dir_arr[0]+'/default-ftp-config.json',encoding='utf-8')
+fp = open(dir_arr[0] + '/default-ftp-config.json',encoding = 'utf-8')
 default_config = json.load(fp)
 
 # Controls command logging. If enabled, all commands run from key bindings and the menu will 

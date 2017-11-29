@@ -1,0 +1,11 @@
+{
+  "type": "ftp",
+  "save_before_upload": true,
+  "upload_on_save": true,
+  "host": "60.205.34.229",
+  "user": "bxu2442520634",
+  "password": "911208Lqmadk",
+  "remote_path": "/htdocs/",
+  "connect_timeout": 15,
+  "ftp_passive_mode": true
+}

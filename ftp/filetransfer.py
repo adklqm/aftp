@@ -35,29 +35,35 @@ class FileTransfer:
             return False
 
           
-        file_handler = open( LocalFile, "rb")   
-        self.ftp.storbinary( 'STOR %s' % RemoteFile, file_handler, 4096 )  
+        file_handler = open( LocalFile, "rb")
+        self.ftp.storbinary( 'STOR %s' % RemoteFile, file_handler, 4096 )
         file_handler.close()  
         return True  
 
     def UpLoadFolder( self, LocalDir, RemoteDir ): 
-        if False == os.path.isdir( LocalDir ):  
+        print(self.isDir(RemoteDir))
+        return
+        if os.path.isdir(LocalDir) == False:
             return False
-        LocalNames = os.listdir( LocalDir )
-        self.ftp.cwd( RemoteDir )   
-        for Local in LocalNames:   
-            src = os.path.join( LocalDir, Local)   
-            if os.path.isdir( src ):   
-                self.UpLoadFolder( src, Local )   
-            else:  
-                self.UpLoadFile( src, Local )   
-            self.ftp.cwd( ".." )   
-        return  
+        print(LocalDir)
+        LocalNames = os.listdir(LocalDir)
+        print(LocalNames)
+        print(RemoteDir)
+        self.ftp.cwd( RemoteDir )
+        for Local in LocalNames:
+            src = os.path.join( LocalDir, Local)
+            if os.path.isdir( src ):
+                self.UpLoadFolder( src, Local )
+            else:
+                self.UpLoadFile( src, Local )
+                
+        self.ftp.cwd( ".." )
 
     def DownLoadFolder( self, LocalDir, RemoteDir ): 
+
         if False == os.path.isdir( LocalDir ):
             os.makedirs( LocalDir )
-        self.ftp.cwd( RemoteDir )   
+        self.ftp.cwd( RemoteDir )
         RemoteNames = self.ftp.nlst()  
 
         for file in RemoteNames:   
@@ -66,29 +72,19 @@ class FileTransfer:
                 self.DownLoadFolder( Local, file )           
             else:  
                 self.DownLoadFile( Local, file )   
-            self.ftp.cwd( ".." )   
+            self.ftp.cwd( ".." )
         return  
 
-    def show( self,list ):
-        result = list.lower().split( " " )
-        if self.path in result and "<dir>" in result:   
-            self.bIsDir = True  
-
     def isDir( self, path ):
-        self.bIsDir = False  
-        self.path = path   
-        #this ues callback function ,that will change bIsDir value   
-        self.ftp.retrlines( 'LIST',self.show )   
-        return self.bIsDir  
+        try:
+            self.ftp.cwd(path)
+        except Exception as e:
+            return False
+        else:
+            self.ftp.cwd('..')
+            return True
+
 
     #close connect
     def close( self ): 
-        self.ftp.quit()  
-
-# ftp.close()
-# ftp.DownLoadFile('test.txt', '/htdocs/test.txt')#ok   
-# ftp.UpLoadFile('test.txt', '/htdocs/test.txt')#ok   
-# ftp.DownLoadFileTree('test/ke', '/ke/te')#ok   
-# ftp.UpLoadFileTree('test',"/ke" )   
-# ftp.close() 
-# print"ok!"
+        self.ftp.quit()
