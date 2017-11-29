@@ -17,7 +17,7 @@ def getFtp(path):
     global CONFIG_PATH
 
     tmp = getConfigPath(path)
-    if len(tmp) < 1:
+    if False == tmp:
         CONFIG_PATH = False
         if False != FTP:
             FTP.close()
@@ -43,6 +43,8 @@ def getFtp(path):
 
 def getConfig():
     global CONFIG_PATH
+    if False == CONFIG_PATH:
+        return []
     fp     = open( os.path.join(CONFIG_PATH,'ftp-config.json') ,encoding = 'utf-8')
     config = json.load(fp)
     return config
@@ -56,7 +58,7 @@ def getConfigPath(path):
         if( os.path.isfile(tmp) and "ftp-config.json" == x ):
             return fileDir
     if(len(fileDir) < 4):
-        return ''
+        return False
     return getConfigPath(fileDir)
 
 
@@ -79,6 +81,8 @@ def getRemotePath(path):
 
 
 def valid(**args):
+    print(args)
+    return True
     if('file' == args['type']):
         if len(args) < 2:
             return True
@@ -110,6 +114,8 @@ class FtpUploadFileCommand(sublime_plugin.TextCommand):
 
     #命令是否可用
     def is_enabled(self,**args):
+
+        viewPath = self.view.file_name()
         args['type'] = 'file'
         return valid(**args)
 
@@ -136,7 +142,7 @@ class FtpDownloadFileCommand(sublime_plugin.TextCommand):
     #命令是否可用
     def is_enabled(self,**args):
         args['type'] = 'file'
-        return valid(**args)
+        return valid(sdfsf='sfsfs')
 
     #命令是否可见
     def is_visible(self,**args):
@@ -156,8 +162,9 @@ class FtpUploadFolderCommand(sublime_plugin.TextCommand):
 
     #命令是否可用
     def is_enabled(self,**args):
+
         args['type'] = 'folder'
-        return valid(**args)
+        return valid(paths=args['paths'],type='dddfff')
 
     #命令是否可见
     def is_visible(self,**args):
@@ -200,3 +207,35 @@ class FtpDiffRemoteFileCommand(sublime_plugin.TextCommand):
     def is_visible(self,**args):
         args['type'] = 'file'
         return valid(**args)
+
+
+#Generate a config file for ftp connect
+class FtpMapToRemotePathCommand(sublime_plugin.TextCommand):
+    def run(self,edit,**args):
+        print(1)
+
+    #命令是否可用
+    def is_enabled(self,**args):
+        args['type'] = 'file'
+        return True
+
+    #命令是否可见
+    def is_visible(self,**args):
+        args['type'] = 'file'
+        return True
+
+
+#Generate a config file for ftp connect
+class FtpMapToRemoteFileCommand(sublime_plugin.TextCommand):
+    def run(self,edit,**args):
+        print(1)
+
+    #命令是否可用
+    def is_enabled(self,**args):
+        args['type'] = 'file'
+        return True
+
+    #命令是否可见
+    def is_visible(self,**args):
+        args['type'] = 'file'
+        return True
