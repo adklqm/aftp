@@ -1,6 +1,6 @@
 # conding:utf-8
 
-import sublime
+import sublime,sublime_plugin
 import traceback
 import os
 import sys
@@ -43,9 +43,41 @@ reloading = {
 # Get refer for active_window
 w = sublime.active_window()
 
-#
-w.create_output_panel('ftp')
 
+panel = w.create_output_panel("ftp")
+
+
+class SeajsCommand(sublime_plugin.TextCommand):
+    def run(self, edit):
+        print(edit.edit_token)
+        self.view.insert(edit,1,"ssdfsdf")
+
+
+class e:
+    edit_token = 45
+
+f = e()
+
+
+
+d = panel.insert(e,0,'sdfsdfsdfs')
+print(d)
+
+# panel.run_command('seajs')
+# print(panel.buffer_id())
+# panel.is_read_only()
+# w.run_command('show_panel',{"panel":"output.ftp"})
+# w.run_command('hide_panel',{"panel":"output.sftp"})
+
+
+# print(w.active_view().encoding())
+# print(w.active_view().set_encoding('UTF-8'))
+
+# w.create_output_panel('sftp')
+
+
+
+# sublime.run_command("show_panel",{"panel":"output.sftp"})
 # Show input panel
 # w.show_input_panel('','welcome',lambda str:sublime.error_message('ok'),lambda str:print(str),lambda:print(11))
 
@@ -54,12 +86,12 @@ w.create_output_panel('ftp')
 
 # w = sublime.active_window()
 # v = w.active_view()
-# v.set_encoding('UTF-8')
+# v.set_encoding('UTF-8')`
 # v.encoding() == UTF-8
 
 
-w = sublime.active_window()
-v = w.active_view()
+# w = sublime.active_window()
+# v = w.active_view()
 
 reload_mods = []
 for mod in sys.modules:
@@ -82,7 +114,6 @@ mods_load_order = [
     'ftp.commands',
     'ftp.listenrs'
 ]
-# print(reload_mods)
 
 mod_load_prefix = ''
 if 3 == st_version:
@@ -104,8 +135,7 @@ try:
         FtpUploadFolderCommand,
         FtpDownloadFolderCommand,
         FtpDiffRemoteFileCommand,
-        FtpMapToRemotePathCommand,
-        FtpMapToRemoteFileCommand
+        FtpMapToRemoteCommand
     )
     from .ftp.listeners import (
         FtpAutoConnectListener
@@ -118,8 +148,7 @@ except(ImportError):
         FtpUploadFolderCommand,
         FtpDownloadFolderCommand,
         FtpDiffRemoteFileCommand,
-        FtpMapToRemotePathCommand,
-        FtpMapToRemoteFileCommand
+        FtpMapToRemoteCommand
     )
     from .ftp.listeners import (
         FtpAutoConnectListener
