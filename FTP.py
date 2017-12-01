@@ -7,6 +7,7 @@ import sys
 import time
 import re
 import json
+import  ftplib
 
 # Get path of current dir. d[0] is a directory and d[1] is a file name
 dir_arr = os.path.split(__file__)
@@ -52,16 +53,28 @@ class SeajsCommand(sublime_plugin.TextCommand):
         print(edit.edit_token)
         self.view.insert(edit,1,"ssdfsdf")
 
-
-class e:
-    edit_token = 45
-
-f = e()
+w.run_command('show_panel',{"panel":"console"})
 
 
+# ftp  = ftplib.FTP()
+# ftp.set_debuglevel(2)
+# ftp.set_pasv(False)
+# ftp.connect( '10.0.11.86', 21 )
+# ftp.login( 'tccms_dev', 'XFVLj6D4hntswH' )
+# fp = open( 'E:\\tccms\\console\\log.text', 'wb' )
 
-d = panel.insert(e,0,'sdfsdfsdfs')
-print(d)
+# try:
+#     ftp.retrbinary( "RETR %s" % ( 'log.text' ), fp.write )
+# except:
+#     print(55)
+#     ftp.set_pasv(True)
+#     ftp.retrbinary( "RETR %s" % ( 'log.text' ), fp.write )
+
+
+
+# fp.close()
+# ftp.close()
+
 
 # panel.run_command('seajs')
 # print(panel.buffer_id())

@@ -18,9 +18,9 @@ class FileTransfer:
         #Open debug,level's val with 0,1,2.   
         self.ftp.set_debuglevel(2)
         #0 active mode, 1 passive
-        self.ftp.set_pasv(0)
+        self.ftp.set_pasv(True)
         #Connect host
-        self.ftp.connect( host, port )
+        self.ftp.connect( host, 21 )
 
     #Login to remote's server
     def Login( self, user, passwd ): 
