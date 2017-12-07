@@ -10,30 +10,46 @@ import  re
 #Instance of Ftp
 FTP         = False
 #It is a path for ftp-config.json
-CONFIG_PATH = False
+LOCAL_PATH = False
+
+FTP_CONFIG = False
 
 def getFtp(path):
     global FTP
-    global CONFIG_PATH
+    global LOCAL_PATH
+    global FTP_CONFIG
 
-    tmp = getConfigPath(path)
+    tmp = getLocalPath(path)
     if False == tmp:
-        CONFIG_PATH = False
+        LOCAL_PATH  = False
+        FTP_CONFIG  = False
         if False != FTP:
             FTP.close()
             FTP = False
             return
 
-    if tmp != CONFIG_PATH:
-        CONFIG_PATH = tmp
+    if tmp != LOCAL_PATH:
+        LOCAL_PATH = tmp
+        FTP_CONFIG = False
+        if FTP != False:
+            FTP.close()
+            FTP = False
+
+    config = getConfig()
+    if False == config:
+        return
+
+    if False == FTP_CONFIG:
+        FTP_CONFIG = config
+    elif (config == FTP_CONFIG):
+        pass
+    else:
+        FTP_CONFIG = config
         if FTP != False:
             FTP.close()
             FTP = False
 
     if False == FTP:
-        config = getConfig()
-        if len(config) < 1:
-            return
         FTP = Ftp(config['host'])
         try:
             FTP.Login(config['user'],config['password'])
@@ -42,16 +58,16 @@ def getFtp(path):
 
 
 def getConfig():
-    global CONFIG_PATH
-    if False == CONFIG_PATH:
-        return {}
-    print(CONFIG_PATH)
-    fp     = open( os.path.join(CONFIG_PATH,'ftp-config.json') ,encoding = 'utf-8')
+    global LOCAL_PATH
+    if False == LOCAL_PATH:
+        return False
+    print(LOCAL_PATH)
+    fp     = open( os.path.join(LOCAL_PATH,'ftp-config.json') ,encoding = 'utf-8')
     config = json.load(fp)
     return config
 
 
-def getConfigPath(path):
+def getLocalPath(path):
     fileDir = (os.path.split(path))[0]
     tmp     = ''
 
@@ -62,58 +78,77 @@ def getConfigPath(path):
 
     if(len(fileDir) < 4):
         return False
-    return getConfigPath(fileDir)
+    return getLocalPath(fileDir)
 
 
-def getRemotePath(path):
-    global CONFIG_PATH
-    getConfigPath(path)
+def getRemotePath():
+    global LOCAL_PATH
+    if False == LOCAL_PATH:
+        return False
+
     config = getConfig()
-    if len(config) < 1:
-        return
-    remotePath = config['remote_path']
+    if False == config:
+        return False
 
+    remotePath = config['remote_path']
     #If it doesn't end with "/"
     if remotePath[-1] != "/":
         remotePath = remotePath + "/"
 
-    tmp = path.replace(CONFIG_PATH + "\\",'')
+    tmp = path.replace(LOCAL_PATH + "\\",'')
     tmp = tmp.replace("\\","/")
-    remotePath = remotePath + tmp
+    remotePath  = remotePath + tmp
     return remotePath
 
 
 def valid(**args):
-    return True
-    if('file' == args['type']):
-        if len(args) < 2:
+    config_path = getLocalPath(args['path'])
+    if False == config_path:
+        if 'transfer' == args['action']:
+            return False
+        elif 'config' == args['action']:
+            if os.path.isdir(args['path']):
+                if os.path.isfile( os.path.join(args['path'],'ftp-config.json') ):
+                    return False
             return True
         else:
-            if os.path.isdir(args['paths'][0]):
-                return False
-            else:
-                return True
+            return False
+
     else:
-        if len(args) < 2:
+        if 'config' == args['action']:
             return False
         else:
-            if os.path.isdir(args['paths'][0]):
+            pass
+
+    if 'transfer' == args['action']:
+        if 'file' == args['command_type']:
+            if os.path.isdir(args['path']):
+                return False
+            else:
+                return True
+        elif 'folder' == args['command_type']:
+            if os.path.isdir(args['path']):
                 return True
             else:
                 return False
+        else:
+            return False
+    else:
+        return False
 
 
 class FtpUploadFileCommand(sublime_plugin.TextCommand):
 
     def run(self,edit,**args):
 
-        path = self.view.file_name()
-        if None == path:
+        try:
             path = args['paths'][0]
+        except Exception:
+            path = self.view.file_name()
 
         getFtp(path)
         global FTP
-        if(FTP == False):
+        if(False == FTP):
             return
 
         FTP.UpLoadFile(path,getRemotePath(path))
@@ -132,13 +167,14 @@ class FtpUploadFileCommand(sublime_plugin.TextCommand):
 
     #
     def _check(self,**args):
-        path = self.view.file_name()
-        if None == path:
+        try:
             path = args['paths'][0]
+        except Exception:
+            path = self.view.file_name()
 
         paragrams = {}
         paragrams['path']   = path
-        paragrams['type']   = 'file'
+        paragrams['command_type']   = 'file'
         paragrams['action'] = 'transfer'
 
         return valid(**paragrams)
@@ -147,9 +183,10 @@ class FtpUploadFileCommand(sublime_plugin.TextCommand):
 class FtpDownloadFileCommand(sublime_plugin.TextCommand):
     def run(self,edit,**args):
 
-        path = self.view.file_name()
-        if None == path:
+        try:
             path = args['paths'][0]
+        except Exception:
+            path = self.view.file_name()
 
         getFtp(path)
         global FTP
@@ -172,13 +209,14 @@ class FtpDownloadFileCommand(sublime_plugin.TextCommand):
 
     #
     def _check(self,**args):
-        path = self.view.file_name()
-        if None == path:
+        try:
             path = args['paths'][0]
+        except Exception:
+            path = self.view.file_name()
 
         paragrams = {}
         paragrams['path']   = path
-        paragrams['type']   = 'file'
+        paragrams['command_type']   = 'file'
         paragrams['action'] = 'transfer'
 
         return valid(**paragrams)
@@ -206,7 +244,7 @@ class FtpUploadFolderCommand(sublime_plugin.TextCommand):
     def _check(self,**args):
         paragrams = {}
         paragrams['path']   = args['paths'][0]
-        paragrams['type']   = 'file'
+        paragrams['command_type']   = 'folder'
         paragrams['action'] = 'transfer'
 
         return valid(**paragrams)
@@ -234,7 +272,7 @@ class FtpDownloadFolderCommand(sublime_plugin.TextCommand):
     def _check(self,**args):
         paragrams = {}
         paragrams['path']   = args['paths'][0]
-        paragrams['type']   = 'file'
+        paragrams['command_type']   = 'folder'
         paragrams['action'] = 'transfer'
 
         return valid(**paragrams)
@@ -242,16 +280,18 @@ class FtpDownloadFolderCommand(sublime_plugin.TextCommand):
 
 class FtpDiffRemoteFileCommand(sublime_plugin.TextCommand):
     def run(self,edit,**args):
-        path = self.view.file_name()
-        if None == path:
+        try:
             path = args['paths'][0]
+        except Exception:
+            path = self.view.file_name()
 
 
         print(path)
 
     #命令是否可用
     def is_enabled(self,**args):
-        return FtpDiffRemoteFileCommand._check(self,**args)
+        return False
+        # return FtpDiffRemoteFileCommand._check(self,**args)
 
     #命令是否可见
     def is_visible(self,**args):
@@ -259,13 +299,14 @@ class FtpDiffRemoteFileCommand(sublime_plugin.TextCommand):
 
     #
     def _check(self,**args):
-        path = self.view.file_name()
-        if None == path:
+        try:
             path = args['paths'][0]
+        except Exception:
+            path = self.view.file_name()
 
         paragrams = {}
         paragrams['path']   = path
-        paragrams['type']   = 'file'
+        paragrams['command_type']   = 'file'
         paragrams['action'] = 'transfer'
 
         return valid(**paragrams)
@@ -275,11 +316,27 @@ class FtpDiffRemoteFileCommand(sublime_plugin.TextCommand):
 class FtpMapToRemoteCommand(sublime_plugin.TextCommand):
 
     def run(self,edit,**args):
-        path = self.view.file_name()
-        if None == path:
+        try:
             path = args['paths'][0]
+        except Exception:
+            path = self.view.file_name()
 
-        print(path)
+        if os.path.isfile(path):
+            paths = os.path.split(path)
+            path  = paths[0]
+
+        default_conf_dir = os.path.split(__file__)
+        default_conf_dir = os.path.split(default_conf_dir[0])
+        default_conf_dir = default_conf_dir[0]
+
+        conf_dir = os.path.join(path,'ftp-config.json')
+
+        default_conf = open( os.path.join(default_conf_dir,'default-ftp-config.json'),'rb' )
+        conf = open(conf_dir,"wb")
+        conf.write(default_conf.read())
+
+        default_conf.close()
+        conf.close()
 
     #命令是否可用
     def is_enabled(self,**args):
@@ -291,13 +348,14 @@ class FtpMapToRemoteCommand(sublime_plugin.TextCommand):
 
     #
     def _check(self,**args):
-        path = self.view.file_name()
-        if None == path:
+        try:
             path = args['paths'][0]
+        except Exception:
+            path = self.view.file_name()
 
         paragrams = {}
         paragrams['path']   = path
-        paragrams['type']   = 'none'
+        paragrams['command_type']   = 'none'
         paragrams['action'] = 'config'
 
         return valid(**paragrams)

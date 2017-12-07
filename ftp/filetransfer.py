@@ -48,7 +48,7 @@ class FileTransfer:
     #Upload a folder to remote's server
     def UpLoadFolder( self, LocalDir, RemoteDir ): 
 
-        if os.path.isdir(LocalDir) == False:
+        if False == os.path.isdir(LocalDir):
             return False
         
         if False == self.isDir(RemoteDir):
