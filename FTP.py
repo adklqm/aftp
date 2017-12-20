@@ -1,5 +1,4 @@
 # conding:utf-8
-
 import sublime,sublime_plugin
 import traceback
 import os
@@ -12,8 +11,11 @@ import  ftplib
 # Get path of current dir. d[0] is a directory and d[1] is a file name
 dir_arr = os.path.split(__file__)
 # Get default config
-fp = open(dir_arr[0] + '/default-ftp-config.json',encoding = 'utf-8')
-default_config = json.load(fp)
+DEFAULT_CONFIG_PATH = os.path.join(dir_arr[0] + '/default-ftp-config.json')
+
+fp = open(DEFAULT_CONFIG_PATH,encoding = 'utf-8')
+DEFAULT_CONFIG = json.load(fp)
+fp.close()
 
 # Controls command logging. If enabled, all commands run from key bindings and the menu will 
 # Be logged to the console.
@@ -91,6 +93,7 @@ w.run_command('show_panel',{"panel":"console"})
 
 
 # sublime.run_command("show_panel",{"panel":"output.sftp"})
+sublime.run_command("show_panel",{"panel":"console"})
 # Show input panel
 # w.show_input_panel('','welcome',lambda str:sublime.error_message('ok'),lambda str:print(str),lambda:print(11))
 

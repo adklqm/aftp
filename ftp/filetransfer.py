@@ -1,5 +1,4 @@
 #coding:utf-8
-
 from ctypes import *
 import os   
 import sys   
@@ -12,19 +11,21 @@ class FileTransfer:
     ftp     = ftplib.FTP()
     bIsDir  = False  
     path    = ""
+    conf    = ""
 
-    def __init__( self, host, port = 21 ):
-
+    def __init__( self,conf):
+        self.conf = conf
+        print(conf['ftp_passive_mode'])
         #Open debug,level's val with 0,1,2.   
         self.ftp.set_debuglevel(2)
         #0 active mode, 1 passive
-        self.ftp.set_pasv(True)
+        self.ftp.set_pasv(conf['ftp_passive_mode'])
         #Connect host
-        self.ftp.connect( host, 21 )
+        self.ftp.connect( conf['host'], conf['port'] )
 
     #Login to remote's server
-    def Login( self, user, passwd ): 
-        self.ftp.login( user, passwd ) 
+    def Login( self): 
+        self.ftp.login( self.conf['user'],self.conf['password'] ) 
 
     #Download a file from remote's server
     def DownLoadFile( self, LocalFile, RemoteFile ):
