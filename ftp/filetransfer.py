@@ -97,6 +97,13 @@ class FileTransfer:
         else:
             self.ftp.cwd('..')
             return True
+    # Check connect
+    def checkConnect(self):
+        try:
+            self.ftp.nlst()
+        except Exception as e:
+            return False
+        return True
 
     #Close ftp connect
     def close( self ): 

@@ -56,6 +56,13 @@ def getFtp(path):
             FTP.close()
             FTP = False
 
+    # Check FTP isn't valid
+    if False != FTP:
+        if True == FTP.checkConnect():
+            pass
+        else:
+            print('connect is disable')
+            FTP = False
     if False == FTP:
         try:
             FTP = Ftp(config)
@@ -67,6 +74,8 @@ def getFtp(path):
         except(ftplib.error_perm):
             FTP = False
             print('Login failure as ' + config['user'])
+
+
 
 
 def getConfig():
