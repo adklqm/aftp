@@ -5,7 +5,9 @@ from    .filetransfer import FileTransfer as Ftp
 import  json
 import  ftplib
 import  re
-from  ..FTP import DEFAULT_CONFIG,DEFAULT_CONFIG_PATH
+from    ..FTP import DEFAULT_CONFIG,DEFAULT_CONFIG_PATH
+import  threading
+import  time
 
 #Instance of Ftp
 FTP         = False
@@ -13,6 +15,8 @@ FTP         = False
 LOCAL_PATH = False
 # A json object for FTP
 FTP_CONFIG = False
+
+
 
 def getFtp(path):
     global FTP
@@ -157,6 +161,17 @@ def valid(**args):
     else:
         return False
 
+# Handle command,增加一个线程，和当前线程通信，根据状态打印响应信息
+def executeCommand(command,path):
+    getFtp(path)
+    global FTP
+    if(FTP == False):
+        return
+
+    'FtpUploadFile'     == command and FTP.UpLoadFile(path,getRemotePath(path))
+    'FtpDownloadFile'   == command and FTP.DownLoadFile(path,getRemotePath(path))
+    'FtpUploadFolder'   == command and FTP.UpLoadFolder(path,getRemotePath(path))
+    'FtpDownloadFolder' == command and FTP.DownLoadFolder(path,getRemotePath(path))
 
 class FtpUploadFileCommand(sublime_plugin.TextCommand):
 
@@ -166,12 +181,8 @@ class FtpUploadFileCommand(sublime_plugin.TextCommand):
         except Exception:
             path = self.view.file_name()
 
-        getFtp(path)
-        global FTP
-        if(False == FTP):
-            return
-
-        FTP.UpLoadFile(path,getRemotePath(path))
+        t = threading.Thread(target = executeCommand,args=('FtpUploadFile',path,))
+        t.start()
 
     #命令是否可用
     def is_enabled(self,**args):
@@ -202,17 +213,13 @@ class FtpUploadFileCommand(sublime_plugin.TextCommand):
 
 class FtpDownloadFileCommand(sublime_plugin.TextCommand):
     def run(self,edit,**args):
-
         try:
             path = args['paths'][0]
         except Exception:
             path = self.view.file_name()
-        getFtp(path)
-        global FTP
-        if(FTP == False):
-            return
 
-        FTP.DownLoadFile(path,getRemotePath(path))
+        t = threading.Thread(target = executeCommand,args=('FtpDownloadFile',path,))
+        t.start()
 
     #命令是否可用
     def is_enabled(self,**args):
@@ -244,12 +251,9 @@ class FtpDownloadFileCommand(sublime_plugin.TextCommand):
 class FtpUploadFolderCommand(sublime_plugin.TextCommand):
     def run(self,edit,**args):
         path = args['paths'][0]
-        getFtp(path)
-        global FTP
-        if(FTP == False):
-            return
 
-        FTP.UpLoadFolder(path,getRemotePath(path))
+        t = threading.Thread(target = executeCommand,args=('FtpUploadFolder',path,))
+        t.start()
 
     #命令是否可用
     def is_enabled(self,**args):
@@ -272,12 +276,9 @@ class FtpUploadFolderCommand(sublime_plugin.TextCommand):
 class FtpDownloadFolderCommand(sublime_plugin.TextCommand):
     def run(self,edit,**args):
         path = args['paths'][0]
-        getFtp(path)
-        global FTP
-        if(False == FTP):
-            return
-
-        FTP.DownLoadFolder(path,getRemotePath(path))
+        
+        t = threading.Thread(target = executeCommand,args=('FtpDownloadFolder',path,))
+        t.start()
 
     #命令是否可用
     def is_enabled(self,**args):

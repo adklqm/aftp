@@ -29,7 +29,7 @@ class FileTransfer:
 
     #Download a file from remote's server
     def DownLoadFile( self, LocalFile, RemoteFile ):
-
+        # if existn't tmp_file.txt new file
         file_handler = open( LocalFile, 'wb' )
         self.ftp.retrbinary( "RETR %s" % ( RemoteFile ), file_handler.write )    
         file_handler.close()

@@ -6,7 +6,7 @@ import sys
 import time
 import re
 import json
-import  ftplib
+import ftplib
 
 # Get path of current dir. d[0] is a directory and d[1] is a file name
 dir_arr = os.path.split(__file__)
