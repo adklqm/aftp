@@ -166,6 +166,7 @@ def executeCommand(command,path):
     'FtpUploadFolder'         == command and FTP.UploadFolder(path,getRemotePath(path))
     'FtpDownloadFolder'       == command and FTP.DownloadFolder(path,getRemotePath(path))
     'FtpDeleteRemoteFolder'   == command and FTP.DeleteRemoteFolder(path,getRemotePath(path))
+    'FtpDiffRemoteFile'       == command and FTP.DiffRemoteFile(path,getRemotePath(path))
 
 class FtpUploadFileCommand(sublime_plugin.TextCommand):
 
@@ -351,10 +352,11 @@ class FtpDiffRemoteFileCommand(sublime_plugin.TextCommand):
         except Exception:
             path = self.view.file_name()
 
+        t = threading.Thread(target = executeCommand,args=('FtpDiffRemoteFile',path,))
+        t.start()
     #命令是否可用
     def is_enabled(self,**args):
-        return False
-        # return FtpDiffRemoteFileCommand._check(self,**args)
+        return FtpDiffRemoteFileCommand._check(self,**args)
 
     #命令是否可见
     def is_visible(self,**args):

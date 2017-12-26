@@ -4,6 +4,7 @@ import os
 import sys
 import ftplib
 import logging
+import difflib
 
 
 class FileTransfer:
@@ -29,7 +30,8 @@ class FileTransfer:
 
     #Download a file from remote's server
     def DownloadFile( self, LocalFile, RemoteFile ):
-        tmp_file = os.path.join(os.path.split(LocalFile)[0],'012jfkjxsfa158101.text')
+        dir_tmp = os.path.split(LocalFile)
+        tmp_file = os.path.join(dir_tmp[0],'/012j101'+dir_tmp[1])
         try:
             file_buffer = open(tmp_file,'wb');
         except Exception:
@@ -138,6 +140,31 @@ class FileTransfer:
         self.__destoryFolder(RemoteDir)
         return True
 
+    def DiffRemoteFile(self,LocalDir,RemoteDir):
+        if False == os.path.isfile(LocalDir):
+            return False
+        dir_tmp  = os.path.split(LocalDir)
+        tmp_file = os.path.join(dir_tmp[0],'10xsdfs00diff'+dir_tmp[1])
+
+        self.DownloadFile(tmp_file,RemoteDir)
+
+        text1_lines = self.readfile(tmp_file)
+        text2_lines = self.readfile(LocalDir)
+
+        path_t = os.path.join(dir_tmp[0],'diff_result.php')
+        diff_obj    = difflib.ndiff(text1_lines, text2_lines)
+        diff_result = open(path_t,'wb')
+
+        diff_str = ''.join(diff_obj)
+        diff_byte = diff_str.encode(encoding='utf-8')
+        diff_result.write(diff_byte)
+        diff_result.close()
+        try:
+            os.remove(tmp_file)
+        except Exception:
+            pass
+        return True
+
     def __destoryFolder(self,path):
         try:
             self.ftp.rmd(path)
@@ -170,3 +197,13 @@ class FileTransfer:
     #Close ftp connect
     def close( self ):
         self.ftp.quit()
+
+    # Open file
+    def readfile(self,filename):
+        try:
+            with open(filename, 'r',encoding = 'utf-8') as fileHandle:
+                text = fileHandle.read().splitlines(keepends=True)
+            return text
+        except IOError as e:
+            print("Read file Error:", e)
+            sys.exit()
