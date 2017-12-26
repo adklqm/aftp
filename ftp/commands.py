@@ -165,7 +165,7 @@ def executeCommand(command,path):
     'FtpDeleteRemoteFile'     == command and FTP.DeleteRemoteFile(path,getRemotePath(path))
     'FtpUploadFolder'         == command and FTP.UploadFolder(path,getRemotePath(path))
     'FtpDownloadFolder'       == command and FTP.DownloadFolder(path,getRemotePath(path))
-    'FtpDeleteRemoteFloder'   == command and FTP.DeleteRemoteFloder(path,getRemotePath(path))
+    'FtpDeleteRemoteFolder'   == command and FTP.DeleteRemoteFolder(path,getRemotePath(path))
 
 class FtpUploadFileCommand(sublime_plugin.TextCommand):
 
@@ -203,7 +203,6 @@ class FtpUploadFileCommand(sublime_plugin.TextCommand):
         paragrams['action'] = 'transfer'
 
         return valid(**paragrams)
-
 
 class FtpDownloadFileCommand(sublime_plugin.TextCommand):
     def run(self,edit,**args):
@@ -273,21 +272,20 @@ class FtpDeleteRemoteFileCommand(sublime_plugin.TextCommand):
 
         return valid(**paragrams)
 
-class FtpDeleteRemoteFloderCommand(sublime_plugin.TextCommand):
+class FtpDeleteRemoteFolderCommand(sublime_plugin.TextCommand):
     def run(self,edit,**args):
         path = args['paths'][0]
 
-        t = threading.Thread(target = executeCommand,args=('FtpDeleteRemoteFloder',path,))
+        t = threading.Thread(target = executeCommand,args=('FtpDeleteRemoteFolder',path,))
         t.start()
 
     #命令是否可用
     def is_enabled(self,**args):
-        return False
-        return FtpDeleteRemoteFloderCommand._check(self,**args)
+        return FtpDeleteRemoteFolderCommand._check(self,**args)
 
     #命令是否可见
     def is_visible(self,**args):
-        return FtpDeleteRemoteFloderCommand._check(self,**args)
+        return FtpDeleteRemoteFolderCommand._check(self,**args)
 
     #
     def _check(self,**args):

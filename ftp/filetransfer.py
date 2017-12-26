@@ -121,7 +121,7 @@ class FileTransfer:
         return
 
     #Delete a folder from remote's server
-    def DeleteRemoteFloder( self, LocalDir, RemoteDir ):
+    def DeleteRemoteFolder( self, LocalDir, RemoteDir ):
         if False == self.isDir(RemoteDir):
             return False
 
@@ -130,7 +130,7 @@ class FileTransfer:
 
         for file in RemoteNames:
             if self.isDir( file ):
-                self.DeleteRemoteFloder( LocalDir, file )
+                self.DeleteRemoteFolder( LocalDir, file )
             else:
                 self.DeleteRemoteFile(LocalDir,file)
 
@@ -163,15 +163,10 @@ class FileTransfer:
         return True
 
     def __isEmptyFloder(self,path):
-        try:
-            files = self.ftp.nlst()
-        except Exception:
-            return False
-        i = 0
+        files = self.ftp.nlst()
         for file in files:
-            i += 1
-        return False if i else True
-
+            return False
+        return True
     #Close ftp connect
     def close( self ):
         self.ftp.quit()
