@@ -16,8 +16,6 @@ LOCAL_PATH = False
 # A json object for FTP
 FTP_CONFIG = False
 
-
-
 def getFtp(path):
     global FTP
     global LOCAL_PATH
@@ -79,18 +77,14 @@ def getFtp(path):
             FTP = False
             print('Login failure as ' + config['user'])
 
-
-
-
 def getConfig():
     global LOCAL_PATH
     if False == LOCAL_PATH:
         return False
-        
+
     fp     = open( os.path.join(LOCAL_PATH,'ftp-config.json') ,encoding = 'utf-8')
     config = json.load(fp)
     return config
-
 
 def getLocalPath(path):
     fileDir = (os.path.split(path))[0]
@@ -104,7 +98,6 @@ def getLocalPath(path):
     if(len(fileDir) < 4):
         return False
     return getLocalPath(fileDir)
-
 
 def getRemotePath(path):
     global LOCAL_PATH
@@ -124,7 +117,6 @@ def getRemotePath(path):
     tmp = tmp.replace("\\","/")
     remotePath  = remotePath + tmp
     return remotePath
-
 
 def valid(**args):
     config_path = getLocalPath(args['path'])
@@ -168,10 +160,11 @@ def executeCommand(command,path):
     if(FTP == False):
         return
 
-    'FtpUploadFile'     == command and FTP.UpLoadFile(path,getRemotePath(path))
-    'FtpDownloadFile'   == command and FTP.DownLoadFile(path,getRemotePath(path))
-    'FtpUploadFolder'   == command and FTP.UpLoadFolder(path,getRemotePath(path))
-    'FtpDownloadFolder' == command and FTP.DownLoadFolder(path,getRemotePath(path))
+    'FtpUploadFile'       == command and FTP.UploadFile(path,getRemotePath(path))
+    'FtpDownloadFile'     == command and FTP.DownloadFile(path,getRemotePath(path))
+    'FtpDeleteRemoteFile' == command and FTP.DeleteRemoteFile(path,getRemotePath(path))
+    'FtpUploadFolder'     == command and FTP.UploadFolder(path,getRemotePath(path))
+    'FtpDownloadFolder'   == command and FTP.DownloadFolder(path,getRemotePath(path))
 
 class FtpUploadFileCommand(sublime_plugin.TextCommand):
 
@@ -247,6 +240,37 @@ class FtpDownloadFileCommand(sublime_plugin.TextCommand):
 
         return valid(**paragrams)
 
+class FtpDeleteRemoteFileCommand(sublime_plugin.TextCommand):
+    def run(self,edit,**args):
+        try:
+            path = args['paths'][0]
+        except Exception:
+            path = self.view.file_name()
+
+        t = threading.Thread(target = executeCommand,args=('FtpDeleteRemoteFile',path,))
+        t.start()
+
+    #命令是否可用
+    def is_enabled(self,**args):
+        return FtpDeleteRemoteFileCommand._check(self,**args)
+
+    #命令是否可见
+    def is_visible(self,**args):
+        return FtpDeleteRemoteFileCommand._check(self,**args)
+
+    #
+    def _check(self,**args):
+        try:
+            path = args['paths'][0]
+        except Exception:
+            path = self.view.file_name()
+
+        paragrams = {}
+        paragrams['path']   = path
+        paragrams['command_type']   = 'file'
+        paragrams['action'] = 'transfer'
+
+        return valid(**paragrams)
 
 class FtpUploadFolderCommand(sublime_plugin.TextCommand):
     def run(self,edit,**args):
@@ -272,11 +296,10 @@ class FtpUploadFolderCommand(sublime_plugin.TextCommand):
 
         return valid(**paragrams)
 
-
 class FtpDownloadFolderCommand(sublime_plugin.TextCommand):
     def run(self,edit,**args):
         path = args['paths'][0]
-        
+
         t = threading.Thread(target = executeCommand,args=('FtpDownloadFolder',path,))
         t.start()
 
@@ -287,7 +310,7 @@ class FtpDownloadFolderCommand(sublime_plugin.TextCommand):
     #命令是否可见
     def is_visible(self,**args):
         return FtpDownloadFolderCommand._check(self,**args)
-    
+
     #
     def _check(self,**args):
         paragrams = {}
@@ -296,7 +319,6 @@ class FtpDownloadFolderCommand(sublime_plugin.TextCommand):
         paragrams['action'] = 'transfer'
 
         return valid(**paragrams)
-
 
 class FtpDiffRemoteFileCommand(sublime_plugin.TextCommand):
     def run(self,edit,**args):
@@ -327,7 +349,6 @@ class FtpDiffRemoteFileCommand(sublime_plugin.TextCommand):
         paragrams['action'] = 'transfer'
 
         return valid(**paragrams)
-
 
 #Generate a config file for ftp connect
 class FtpMapToRemoteCommand(sublime_plugin.TextCommand):

@@ -17,7 +17,7 @@ fp = open(DEFAULT_CONFIG_PATH,encoding = 'utf-8')
 DEFAULT_CONFIG = json.load(fp)
 fp.close()
 
-# Controls command logging. If enabled, all commands run from key bindings and the menu will 
+# Controls command logging. If enabled, all commands run from key bindings and the menu will
 # Be logged to the console.
 # sublime.log_commands(False)
 
@@ -151,7 +151,8 @@ try:
         FtpUploadFolderCommand,
         FtpDownloadFolderCommand,
         FtpDiffRemoteFileCommand,
-        FtpMapToRemoteCommand
+        FtpMapToRemoteCommand,
+        FtpDeleteRemoteFileCommand
     )
     from .ftp.listeners import (
         FtpAutoConnectListener
@@ -164,7 +165,8 @@ except(ImportError):
         FtpUploadFolderCommand,
         FtpDownloadFolderCommand,
         FtpDiffRemoteFileCommand,
-        FtpMapToRemoteCommand
+        FtpMapToRemoteCommand,
+        FtpDeleteRemoteFileCommand
     )
     from .ftp.listeners import (
         FtpAutoConnectListener

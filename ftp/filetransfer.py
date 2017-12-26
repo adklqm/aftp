@@ -28,15 +28,38 @@ class FileTransfer:
         self.ftp.login( self.conf['user'],self.conf['password'] )
 
     #Download a file from remote's server
-    def DownLoadFile( self, LocalFile, RemoteFile ):
-        # if existn't tmp_file.txt new file
+    def DownloadFile( self, LocalFile, RemoteFile ):
+        tmp_file = os.path.join(os.path.split(LocalFile)[0],'012jfkjxsfa158101.text')
+        try:
+            file_buffer = open(tmp_file,'wb');
+        except Exception:
+            print('Failed open temp file:' + tmp_file)
+            return True
+        try:
+            self.ftp.retrbinary( "RETR %s" % ( RemoteFile ), file_buffer.write )
+            file_buffer.close()
+        except Exception:
+            print('Failed download file from remote server')
+            file_buffer.close()
+            try:
+                os.remove(tmp_file)
+            except Exception:
+                pass
+            return True
+
+        file_buffer  = open(tmp_file,'rb');
         file_handler = open( LocalFile, 'wb' )
-        self.ftp.retrbinary( "RETR %s" % ( RemoteFile ), file_handler.write )
+        file_handler.write(file_buffer.read())
         file_handler.close()
+        file_buffer.close()
+        try:
+            os.remove(tmp_file)
+        except Exception:
+            pass
         return True
 
     #Upload a file to remote's server
-    def UpLoadFile( self, LocalFile, RemoteFile ):
+    def UploadFile( self, LocalFile, RemoteFile ):
 
         if False == os.path.isfile( LocalFile ):
             return False
@@ -46,8 +69,17 @@ class FileTransfer:
         file_handler.close()
         return True
 
+    def DeleteRemoteFile(self,LocalFile,RemoteDir):
+        if False == os.path.isfile( LocalFile ):
+            return False
+        try:
+            self.ftp.delete(RemoteDir)
+            print('success delete remote file')
+        except Exception:
+            print('Failed delete remote file')
+
     #Upload a folder to remote's server
-    def UpLoadFolder( self, LocalDir, RemoteDir ):
+    def UploadFolder( self, LocalDir, RemoteDir ):
 
         if False == os.path.isdir(LocalDir):
             return False
@@ -69,7 +101,7 @@ class FileTransfer:
         self.ftp.cwd( ".." )
 
     #Download a folder from remote's sever
-    def DownLoadFolder( self, LocalDir, RemoteDir ):
+    def DownloadFolder( self, LocalDir, RemoteDir ):
 
         if False == os.path.isdir( LocalDir ):
             os.makedirs( LocalDir )

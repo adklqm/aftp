@@ -9,6 +9,7 @@
             { "caption": "-" },
             { "caption": "Diff Remote File", "command": "ftp_diff_remote_file" },
             { "caption": "-" },
+            { "caption": "Delete Remote File", "command": "ftp_delete_remote_file"},
             { "caption": "Map to Remote...", "command": "ftp_map_to_remote"}
         ]
     }
