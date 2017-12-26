@@ -152,7 +152,8 @@ try:
         FtpDownloadFolderCommand,
         FtpDiffRemoteFileCommand,
         FtpMapToRemoteCommand,
-        FtpDeleteRemoteFileCommand
+        FtpDeleteRemoteFileCommand,
+        FtpDeleteRemoteFloderCommand
     )
     from .ftp.listeners import (
         FtpAutoConnectListener
@@ -166,7 +167,8 @@ except(ImportError):
         FtpDownloadFolderCommand,
         FtpDiffRemoteFileCommand,
         FtpMapToRemoteCommand,
-        FtpDeleteRemoteFileCommand
+        FtpDeleteRemoteFileCommand,
+        FtpDeleteRemoteFloderCommand
     )
     from .ftp.listeners import (
         FtpAutoConnectListener

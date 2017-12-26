@@ -13,6 +13,7 @@
             { "caption": "Diff Remote File", "command": "ftp_diff_remote_file", "args": {"paths": []} },
             { "caption": "-" },
             { "caption": "Delete Remote File", "command": "ftp_delete_remote_file", "args": {"paths": []} },
+            { "caption": "Delete Remote Folder", "command": "ftp_delete_remote_floder", "args": {"paths": []} },
             { "caption": "Map to Remote...", "command": "ftp_map_to_remote", "args": {"paths": []} }
         ]
     }

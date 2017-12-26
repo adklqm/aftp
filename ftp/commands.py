@@ -160,11 +160,12 @@ def executeCommand(command,path):
     if(FTP == False):
         return
 
-    'FtpUploadFile'       == command and FTP.UploadFile(path,getRemotePath(path))
-    'FtpDownloadFile'     == command and FTP.DownloadFile(path,getRemotePath(path))
-    'FtpDeleteRemoteFile' == command and FTP.DeleteRemoteFile(path,getRemotePath(path))
-    'FtpUploadFolder'     == command and FTP.UploadFolder(path,getRemotePath(path))
-    'FtpDownloadFolder'   == command and FTP.DownloadFolder(path,getRemotePath(path))
+    'FtpUploadFile'           == command and FTP.UploadFile(path,getRemotePath(path))
+    'FtpDownloadFile'         == command and FTP.DownloadFile(path,getRemotePath(path))
+    'FtpDeleteRemoteFile'     == command and FTP.DeleteRemoteFile(path,getRemotePath(path))
+    'FtpUploadFolder'         == command and FTP.UploadFolder(path,getRemotePath(path))
+    'FtpDownloadFolder'       == command and FTP.DownloadFolder(path,getRemotePath(path))
+    'FtpDeleteRemoteFloder'   == command and FTP.DeleteRemoteFloder(path,getRemotePath(path))
 
 class FtpUploadFileCommand(sublime_plugin.TextCommand):
 
@@ -269,6 +270,31 @@ class FtpDeleteRemoteFileCommand(sublime_plugin.TextCommand):
         paragrams['path']   = path
         paragrams['command_type']   = 'file'
         paragrams['action'] = 'transfer'
+
+        return valid(**paragrams)
+
+class FtpDeleteRemoteFloderCommand(sublime_plugin.TextCommand):
+    def run(self,edit,**args):
+        path = args['paths'][0]
+
+        t = threading.Thread(target = executeCommand,args=('FtpDeleteRemoteFloder',path,))
+        t.start()
+
+    #命令是否可用
+    def is_enabled(self,**args):
+        return False
+        return FtpDeleteRemoteFloderCommand._check(self,**args)
+
+    #命令是否可见
+    def is_visible(self,**args):
+        return FtpDeleteRemoteFloderCommand._check(self,**args)
+
+    #
+    def _check(self,**args):
+        paragrams = {}
+        paragrams['path']           = args['paths'][0]
+        paragrams['command_type']   = 'folder'
+        paragrams['action']         = 'transfer'
 
         return valid(**paragrams)
 

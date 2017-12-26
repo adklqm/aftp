@@ -17,7 +17,7 @@ class FileTransfer:
         self.conf = conf
         print(conf['ftp_passive_mode'])
         #Open debug,level's val with 0,1,2.
-        self.ftp.set_debuglevel(2)
+        self.ftp.set_debuglevel(1)
         #0 active mode, 1 passive
         self.ftp.set_pasv(conf['ftp_passive_mode'])
         #Connect host
@@ -70,7 +70,7 @@ class FileTransfer:
         return True
 
     def DeleteRemoteFile(self,LocalFile,RemoteDir):
-        if False == os.path.isfile( LocalFile ):
+        if True == self.isDir(RemoteDir):
             return False
         try:
             self.ftp.delete(RemoteDir)
@@ -94,9 +94,9 @@ class FileTransfer:
         for file in LocalNames:
             path = os.path.join( LocalDir, file)
             if os.path.isdir( path ):
-                self.UpLoadFolder( path, file )
+                self.UploadFolder( path, file )
             else:
-                self.UpLoadFile( path, file )
+                self.UploadFile( path, file )
 
         self.ftp.cwd( ".." )
 
@@ -113,12 +113,37 @@ class FileTransfer:
         for file in RemoteNames:
             path = os.path.join( LocalDir, file )
             if self.isDir( file ):
-                self.DownLoadFolder( path, file )
+                self.DownloadFolder( path, file )
             else:
-                self.DownLoadFile( path, file )
+                self.DownloadFile( path, file )
 
         self.ftp.cwd( ".." )
         return
+
+    #Delete a folder from remote's server
+    def DeleteRemoteFloder( self, LocalDir, RemoteDir ):
+        if False == self.isDir(RemoteDir):
+            return False
+
+        self.ftp.cwd( RemoteDir )
+        RemoteNames = self.ftp.nlst()
+
+        for file in RemoteNames:
+            if self.isDir( file ):
+                self.DeleteRemoteFloder( LocalDir, file )
+            else:
+                self.DeleteRemoteFile(LocalDir,file)
+
+        self.ftp.cwd('..')
+        self.__destoryFolder(RemoteDir)
+        return True
+
+    def __destoryFolder(self,path):
+        try:
+            self.ftp.rmd(path)
+            print('Success delete remote floder')
+        except Exception as e:
+            raise e
 
     #Check whether the remote's path is a directory
     def isDir( self, path ):
@@ -136,6 +161,16 @@ class FileTransfer:
         except Exception as e:
             return False
         return True
+
+    def __isEmptyFloder(self,path):
+        try:
+            files = self.ftp.nlst()
+        except Exception:
+            return False
+        i = 0
+        for file in files:
+            i += 1
+        return False if i else True
 
     #Close ftp connect
     def close( self ):
