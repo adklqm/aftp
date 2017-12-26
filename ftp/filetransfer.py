@@ -1,7 +1,7 @@
 #coding:utf-8
 from ctypes import *
-import os   
-import sys   
+import os
+import sys
 import ftplib
 import logging
 
@@ -9,14 +9,14 @@ import logging
 class FileTransfer:
 
     ftp     = ftplib.FTP()
-    bIsDir  = False  
+    bIsDir  = False
     path    = ""
     conf    = ""
 
     def __init__( self,conf):
         self.conf = conf
         print(conf['ftp_passive_mode'])
-        #Open debug,level's val with 0,1,2.   
+        #Open debug,level's val with 0,1,2.
         self.ftp.set_debuglevel(2)
         #0 active mode, 1 passive
         self.ftp.set_pasv(conf['ftp_passive_mode'])
@@ -24,34 +24,34 @@ class FileTransfer:
         self.ftp.connect( conf['host'], conf['port'] )
 
     #Login to remote's server
-    def Login( self): 
-        self.ftp.login( self.conf['user'],self.conf['password'] ) 
+    def Login( self):
+        self.ftp.login( self.conf['user'],self.conf['password'] )
 
     #Download a file from remote's server
     def DownLoadFile( self, LocalFile, RemoteFile ):
         # if existn't tmp_file.txt new file
         file_handler = open( LocalFile, 'wb' )
-        self.ftp.retrbinary( "RETR %s" % ( RemoteFile ), file_handler.write )    
+        self.ftp.retrbinary( "RETR %s" % ( RemoteFile ), file_handler.write )
         file_handler.close()
         return True
 
     #Upload a file to remote's server
     def UpLoadFile( self, LocalFile, RemoteFile ):
 
-        if False == os.path.isfile( LocalFile ):  
+        if False == os.path.isfile( LocalFile ):
             return False
-          
+
         file_handler = open( LocalFile, "rb")
         self.ftp.storbinary( 'STOR %s' % RemoteFile, file_handler, 4096 )
-        file_handler.close()  
-        return True  
+        file_handler.close()
+        return True
 
     #Upload a folder to remote's server
-    def UpLoadFolder( self, LocalDir, RemoteDir ): 
+    def UpLoadFolder( self, LocalDir, RemoteDir ):
 
         if False == os.path.isdir(LocalDir):
             return False
-        
+
         if False == self.isDir(RemoteDir):
             self.ftp.mkd(RemoteDir)
 
@@ -65,11 +65,11 @@ class FileTransfer:
                 self.UpLoadFolder( path, file )
             else:
                 self.UpLoadFile( path, file )
-                
+
         self.ftp.cwd( ".." )
 
     #Download a folder from remote's sever
-    def DownLoadFolder( self, LocalDir, RemoteDir ): 
+    def DownLoadFolder( self, LocalDir, RemoteDir ):
 
         if False == os.path.isdir( LocalDir ):
             os.makedirs( LocalDir )
@@ -79,10 +79,10 @@ class FileTransfer:
         RemoteNames = self.ftp.nlst()
         path = ''
         for file in RemoteNames:
-            path = os.path.join( LocalDir, file ) 
+            path = os.path.join( LocalDir, file )
             if self.isDir( file ):
-                self.DownLoadFolder( path, file )           
-            else:  
+                self.DownLoadFolder( path, file )
+            else:
                 self.DownLoadFile( path, file )
 
         self.ftp.cwd( ".." )
@@ -106,5 +106,5 @@ class FileTransfer:
         return True
 
     #Close ftp connect
-    def close( self ): 
+    def close( self ):
         self.ftp.quit()
