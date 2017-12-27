@@ -1,4 +1,4 @@
-# conding:utf-8
+#ssdfsdfssdfsdfssdfsdf conding:utf-8
 import sublime,sublime_plugin
 import traceback
 import os
@@ -12,10 +12,17 @@ import ftplib
 dir_arr = os.path.split(__file__)
 # Get default config
 DEFAULT_CONFIG_PATH = os.path.join(dir_arr[0] + '/default-ftp-config.json')
-
 fp = open(DEFAULT_CONFIG_PATH,encoding = 'utf-8')
 DEFAULT_CONFIG = json.load(fp)
 fp.close()
+
+
+if False == os.path.exists(os.path.join(sublime.cache_path(),'FTP')):
+    try:
+        os.mkdir(os.path.join(sublime.cache_path(),'FTP'))
+    except Exception:
+        raise Exception
+
 
 # Controls command logging. If enabled, all commands run from key bindings and the menu will
 # Be logged to the console.
@@ -48,35 +55,28 @@ w = sublime.active_window()
 
 
 panel = w.create_output_panel("ftp")
-
+# print(panel.buffer_id())
 
 class SeajsCommand(sublime_plugin.TextCommand):
     def run(self, edit):
-        print(edit.edit_token)
+        print(self.view.file_name())
         self.view.insert(edit,1,"ssdfsdf")
 
-w.run_command('show_panel',{"panel":"console"})
 
+# v = w.open_file('gg')
+# v.set_scratch(True)
+# w.focus_view(v)
 
-# ftp  = ftplib.FTP()
-# ftp.set_debuglevel(2)
-# ftp.set_pasv(False)
-# ftp.connect( '10.0.11.86', 21 )
-# ftp.login( 'tccms_dev', 'XFVLj6D4hntswH' )
-# fp = open( 'E:\\tccms\\console\\log.text', 'wb' )
+# f = open(v.file_name(),'wb',)
+# f.write(b'sdfdsfsdgdfgdfgdgdffgd445f')
+# f.close()
+# e = v.begin_edit(99999,'insert')
+# v.insert(e,1,'sdfsdfsdfs')
+# print(v.file_name())
+# v.end_edit(e)
+# w.run_command('seajs',{})
 
-# try:
-#     ftp.retrbinary( "RETR %s" % ( 'log.text' ), fp.write )
-# except:
-#     print(55)
-#     ftp.set_pasv(True)
-#     ftp.retrbinary( "RETR %s" % ( 'log.text' ), fp.write )
-
-
-
-# fp.close()
-# ftp.close()
-
+# set_scratch
 
 # panel.run_command('seajs')
 # print(panel.buffer_id())
@@ -98,7 +98,7 @@ sublime.run_command("show_panel",{"panel":"console"})
 # w.show_input_panel('','welcome',lambda str:sublime.error_message('ok'),lambda str:print(str),lambda:print(11))
 
 # Show a panel with quick choose
-# w.show_quick_panel('4554545',lambda chid:sublime.error_message('f')) 
+# w.show_quick_panel('4554545',lambda chid:sublime.error_message('f'))
 
 # w = sublime.active_window()
 # v = w.active_view()

@@ -38,7 +38,7 @@ def getFtp(path):
             FTP.close()
             FTP = False
 
-    config = getConfig()
+    config = getConfig(LOCAL_PATH)
     if False == config:
         LOCAL_PATH = False
         FTP_CONFIG = False
@@ -77,14 +77,16 @@ def getFtp(path):
             FTP = False
             print('Login failure as ' + config['user'])
 
-def getConfig():
-    global LOCAL_PATH
-    if False == LOCAL_PATH:
+def getConfig(localDir):
+    try:
+        fp     = open(os.path.join(localDir,'ftp-config.json') ,'r',encoding = 'utf-8')
+    except Exception:
         return False
-
-    fp     = open( os.path.join(LOCAL_PATH,'ftp-config.json') ,encoding = 'utf-8')
-    config = json.load(fp)
-    return config
+    try:
+        config = json.load(fp)
+        return config
+    except Exception:
+        return False
 
 def getLocalPath(path):
     fileDir = (os.path.split(path))[0]
@@ -99,21 +101,20 @@ def getLocalPath(path):
         return False
     return getLocalPath(fileDir)
 
-def getRemotePath(path):
-    global LOCAL_PATH
-    if False == LOCAL_PATH:
-        return False
-
-    config = getConfig()
+def getRemotePath(localDir,path):
+    config = getConfig(localDir)
     if False == config:
         return False
-
-    remotePath = config['remote_path']
+    try:
+        remotePath = config['remote_path']
+    except Exception:
+        print('Failed get remote_path from config file')
+        return False
     #If it doesn't end with "/"
     if remotePath[-1] != "/":
         remotePath = remotePath + "/"
 
-    tmp = path.replace(LOCAL_PATH + "\\",'')
+    tmp = path.replace(localDir + "\\",'')
     tmp = tmp.replace("\\","/")
     remotePath  = remotePath + tmp
     return remotePath
@@ -157,16 +158,17 @@ def valid(**args):
 def executeCommand(command,path):
     getFtp(path)
     global FTP
+    global LOCAL_PATH
     if(FTP == False):
         return
 
-    'FtpUploadFile'           == command and FTP.UploadFile(path,getRemotePath(path))
-    'FtpDownloadFile'         == command and FTP.DownloadFile(path,getRemotePath(path))
-    'FtpDeleteRemoteFile'     == command and FTP.DeleteRemoteFile(path,getRemotePath(path))
-    'FtpUploadFolder'         == command and FTP.UploadFolder(path,getRemotePath(path))
-    'FtpDownloadFolder'       == command and FTP.DownloadFolder(path,getRemotePath(path))
-    'FtpDeleteRemoteFolder'   == command and FTP.DeleteRemoteFolder(path,getRemotePath(path))
-    'FtpDiffRemoteFile'       == command and FTP.DiffRemoteFile(path,getRemotePath(path))
+    'FtpUploadFile'           == command and FTP.UploadFile(path,getRemotePath(LOCAL_PATH,path))
+    'FtpDownloadFile'         == command and FTP.DownloadFile(path,getRemotePath(LOCAL_PATH,path))
+    'FtpDeleteRemoteFile'     == command and FTP.DeleteRemoteFile(path,getRemotePath(LOCAL_PATH,path))
+    'FtpUploadFolder'         == command and FTP.UploadFolder(path,getRemotePath(LOCAL_PATH,path))
+    'FtpDownloadFolder'       == command and FTP.DownloadFolder(path,getRemotePath(LOCAL_PATH,path))
+    'FtpDeleteRemoteFolder'   == command and FTP.DeleteRemoteFolder(path,getRemotePath(LOCAL_PATH,path))
+    'FtpDiffRemoteFile'       == command and FTP.DiffRemoteFile(path,getRemotePath(LOCAL_PATH,path))
 
 class FtpUploadFileCommand(sublime_plugin.TextCommand):
 
@@ -248,6 +250,16 @@ class FtpDeleteRemoteFileCommand(sublime_plugin.TextCommand):
         except Exception:
             path = self.view.file_name()
 
+        localDir = getLocalPath(path)
+        if False == localDir:
+            return False
+        file_name = getRemotePath(localDir,path)
+        if False == file_name:
+            return False
+
+        result = sublime.ok_cancel_dialog('Confirm delete remote file: \n'+file_name,'ok')
+        if False == result:
+            return False
         t = threading.Thread(target = executeCommand,args=('FtpDeleteRemoteFile',path,))
         t.start()
 
@@ -276,7 +288,16 @@ class FtpDeleteRemoteFileCommand(sublime_plugin.TextCommand):
 class FtpDeleteRemoteFolderCommand(sublime_plugin.TextCommand):
     def run(self,edit,**args):
         path = args['paths'][0]
+        localDir = getLocalPath(path)
+        if False == localDir:
+            return False
+        folder_name = getRemotePath(localDir,path)
+        if False == folder_name:
+            return False
 
+        result = sublime.ok_cancel_dialog('Confirm delete remote folder: \n'+folder_name,'ok')
+        if False == result:
+            return False
         t = threading.Thread(target = executeCommand,args=('FtpDeleteRemoteFolder',path,))
         t.start()
 

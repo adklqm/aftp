@@ -1,10 +1,11 @@
 #coding:utf-8
-from ctypes import *
+from   ctypes import *
 import os
 import sys
 import ftplib
 import logging
 import difflib
+import sublime
 
 
 class FileTransfer:
@@ -13,10 +14,11 @@ class FileTransfer:
     bIsDir  = False
     path    = ""
     conf    = ""
+    plugin_cache = ""
 
     def __init__( self,conf):
+        self.plugin_cache = os.path.join(sublime.cache_path(),'FTP')
         self.conf = conf
-        print(conf['ftp_passive_mode'])
         #Open debug,level's val with 0,1,2.
         self.ftp.set_debuglevel(1)
         #0 active mode, 1 passive
@@ -30,8 +32,8 @@ class FileTransfer:
 
     #Download a file from remote's server
     def DownloadFile( self, LocalFile, RemoteFile ):
-        dir_tmp = os.path.split(LocalFile)
-        tmp_file = os.path.join(dir_tmp[0],'/012j101'+dir_tmp[1])
+        dir_tmp  = os.path.splitext(LocalFile)
+        tmp_file = os.path.join(self.plugin_cache,'7821214dssddsd'+dir_tmp[1])
         try:
             file_buffer = open(tmp_file,'wb');
         except Exception:
@@ -43,10 +45,6 @@ class FileTransfer:
         except Exception:
             print('Failed download file from remote server')
             file_buffer.close()
-            try:
-                os.remove(tmp_file)
-            except Exception:
-                pass
             return True
 
         file_buffer  = open(tmp_file,'rb');
@@ -54,10 +52,6 @@ class FileTransfer:
         file_handler.write(file_buffer.read())
         file_handler.close()
         file_buffer.close()
-        try:
-            os.remove(tmp_file)
-        except Exception:
-            pass
         return True
 
     #Upload a file to remote's server
@@ -143,27 +137,26 @@ class FileTransfer:
     def DiffRemoteFile(self,LocalDir,RemoteDir):
         if False == os.path.isfile(LocalDir):
             return False
-        dir_tmp  = os.path.split(LocalDir)
-        tmp_file = os.path.join(dir_tmp[0],'10xsdfs00diff'+dir_tmp[1])
+
+        file_extension  = os.path.splitext(LocalDir)
+        file_name       = os.path.split(LocalDir)
+        tmp_file        = os.path.join(self.plugin_cache,'10xsdfs00diff'+file_extension[1])
+        diff_path       = os.path.join(self.plugin_cache,'remote-'+file_name[1]+'————local-'+file_name[1])
 
         self.DownloadFile(tmp_file,RemoteDir)
 
         text1_lines = self.readfile(tmp_file)
         text2_lines = self.readfile(LocalDir)
 
-        path_t = os.path.join(dir_tmp[0],'diff_result.php')
-        diff_obj    = difflib.ndiff(text1_lines, text2_lines)
-        diff_result = open(path_t,'wb')
+        diff_result   = difflib.ndiff(text1_lines, text2_lines)
+        diff_byte     = (''.join(diff_result)).encode(encoding='utf-8')
 
-        diff_str = ''.join(diff_obj)
-        diff_byte = diff_str.encode(encoding='utf-8')
-        diff_result.write(diff_byte)
-        diff_result.close()
-        try:
-            os.remove(tmp_file)
-        except Exception:
-            pass
-        return True
+        diff_file = open(diff_path,'wb')
+        diff_file.write(diff_byte)
+        diff_file.close()
+
+        diff_view     = sublime.active_window().open_file(diff_path)
+        diff_view.set_scratch(True)
 
     def __destoryFolder(self,path):
         try:
