@@ -53,7 +53,6 @@ reloading = {
 # Get refer for active_window
 w = sublime.active_window()
 
-
 panel = w.create_output_panel("ftp")
 # print(panel.buffer_id())
 
@@ -63,25 +62,24 @@ class SeajsCommand(sublime_plugin.TextCommand):
         self.view.insert(edit,1,"ssdfsdf")
 
 
-# v = w.open_file('gg')
+# v = w.new_file(99)
+# v.set_name('gggg')
 # v.set_scratch(True)
 # w.focus_view(v)
 
-# f = open(v.file_name(),'wb',)
-# f.write(b'sdfdsfsdgdfgdfgdgdffgd445f')
-# f.close()
-# e = v.begin_edit(99999,'insert')
-# v.insert(e,1,'sdfsdfsdfs')
-# print(v.file_name())
-# v.end_edit(e)
-# w.run_command('seajs',{})
+v = panel
 
+panel.run_command('insert',{"characters":"sfsdfs"})
+panel.run_command('insert',{"characters":"\nsfsdfs"})
+
+panel.window_to_layout((1,4))
 # set_scratch
 
 # panel.run_command('seajs')
 # print(panel.buffer_id())
 # panel.is_read_only()
 # w.run_command('show_panel',{"panel":"output.ftp"})
+panel.is_read_only()
 # w.run_command('hide_panel',{"panel":"output.sftp"})
 
 
@@ -92,8 +90,8 @@ class SeajsCommand(sublime_plugin.TextCommand):
 
 
 
-# sublime.run_command("show_panel",{"panel":"output.sftp"})
-sublime.run_command("show_panel",{"panel":"console"})
+# sublime.run_command("show_panel",{"panel":"output.ftp"})
+# sublime.run_command("show_panel",{"panel":"console"})
 # Show input panel
 # w.show_input_panel('','welcome',lambda str:sublime.error_message('ok'),lambda str:print(str),lambda:print(11))
 
