@@ -1,15 +1,11 @@
 #coding:utf-8
-from   ctypes import *
 import os
 import sys
 import ftplib
-import logging
 import difflib
 import sublime
 
-
 class FileTransfer:
-
     ftp     = ftplib.FTP()
     bIsDir  = False
     path    = ""
@@ -37,15 +33,12 @@ class FileTransfer:
         try:
             file_buffer = open(tmp_file,'wb');
         except Exception:
-            print('Failed open temp file:' + tmp_file)
-            return True
+            pass
         try:
             self.ftp.retrbinary( "RETR %s" % ( RemoteFile ), file_buffer.write )
             file_buffer.close()
         except Exception:
-            print('Failed download file from remote server')
-            file_buffer.close()
-            return True
+            pass
 
         file_buffer  = open(tmp_file,'rb');
         file_handler = open( LocalFile, 'wb' )
@@ -70,13 +63,11 @@ class FileTransfer:
             return False
         try:
             self.ftp.delete(RemoteDir)
-            print('success delete remote file')
         except Exception:
-            print('Failed delete remote file')
+            pass
 
     #Upload a folder to remote's server
     def UploadFolder( self, LocalDir, RemoteDir ):
-
         if False == os.path.isdir(LocalDir):
             return False
 
@@ -114,7 +105,6 @@ class FileTransfer:
                 self.DownloadFile( path, file )
 
         self.ftp.cwd( ".." )
-        return
 
     #Delete a folder from remote's server
     def DeleteRemoteFolder( self, LocalDir, RemoteDir ):
@@ -134,6 +124,7 @@ class FileTransfer:
         self.__destoryFolder(RemoteDir)
         return True
 
+    # Compare file local with remote 
     def DiffRemoteFile(self,LocalDir,RemoteDir):
         if False == os.path.isfile(LocalDir):
             return False
@@ -149,6 +140,7 @@ class FileTransfer:
         text2_lines = self.readfile(LocalDir)
 
         diff_result   = difflib.ndiff(text1_lines, text2_lines)
+        diff_result     = ''.join(diff_result)
         diff_byte     = (''.join(diff_result)).encode(encoding='utf-8')
 
         diff_file = open(diff_path,'wb')
@@ -159,18 +151,23 @@ class FileTransfer:
         diff_view.set_scratch(True)
 
         try:
+            os.remove(diff_path)
+        except Exception:
+            pass
+            
+        try:
             os.remove(tmp_file)
         except Exception:
             pass
 
+    # Delete remote folder
     def __destoryFolder(self,path):
         try:
             self.ftp.rmd(path)
-            print('Success delete remote floder')
-        except Exception as e:
-            raise e
+        except Exception:
+            pass
 
-    #Check whether the remote's path is a directory
+    # Check whether the remote's path is a directory
     def isDir( self, path ):
         try:
             self.ftp.cwd(path)
@@ -179,7 +176,8 @@ class FileTransfer:
         else:
             self.ftp.cwd('..')
             return True
-    # Check connect
+
+    # Check connect is enable
     def checkConnect(self):
         try:
             self.ftp.nlst()
@@ -187,6 +185,7 @@ class FileTransfer:
             return False
         return True
 
+    # Check remote folder is empty  
     def __isEmptyFloder(self,path):
         files = self.ftp.nlst()
         for file in files:
@@ -196,12 +195,11 @@ class FileTransfer:
     def close( self ):
         self.ftp.quit()
 
-    # Open file
+    # Load file content
     def readfile(self,filename):
         try:
             with open(filename, 'r',encoding = 'utf-8') as fileHandle:
                 text = fileHandle.read().splitlines(keepends=True)
             return text
         except IOError as e:
-            print("Read file Error:", e)
             sys.exit()

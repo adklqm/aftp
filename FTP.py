@@ -1,32 +1,28 @@
-#ssdfsdfssdfsdfssdfsdf conding:utf-8
+# conding:utf-8
 import sublime,sublime_plugin
-import traceback
 import os
-import sys
-import time
 import re
+import sys
 import json
-import ftplib
+import traceback
 
 # Get path of current dir. d[0] is a directory and d[1] is a file name
 dir_arr = os.path.split(__file__)
 # Get default config
 DEFAULT_CONFIG_PATH = os.path.join(dir_arr[0] + '/default-ftp-config.json')
-fp = open(DEFAULT_CONFIG_PATH,encoding = 'utf-8')
-DEFAULT_CONFIG = json.load(fp)
+fp                  = open(DEFAULT_CONFIG_PATH,encoding = 'utf-8')
+DEFAULT_CONFIG      = json.load(fp)
 fp.close()
 
+# Get refer for active_window
+ACTIVE_WINDOW = sublime.active_window()
+LOG_PANEL     = ACTIVE_WINDOW.create_output_panel("aftp")
 
 if False == os.path.exists(os.path.join(sublime.cache_path(),'FTP')):
     try:
         os.mkdir(os.path.join(sublime.cache_path(),'FTP'))
     except Exception:
         raise Exception
-
-
-# Controls command logging. If enabled, all commands run from key bindings and the menu will
-# Be logged to the console.
-# sublime.log_commands(False)
 
 # Set sublime text version
 st_version = 2
@@ -50,62 +46,15 @@ reloading = {
 # Show a dialog with confirm and cancel
 # result = sublime.ok_cancel_dialog('msg','ok')
 
-# Get refer for active_window
-w = sublime.active_window()
-
-panel = w.create_output_panel("ftp")
-# print(panel.buffer_id())
-
-class SeajsCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
-        print(self.view.file_name())
-        self.view.insert(edit,1,"ssdfsdf")
-
-
-# v = w.new_file(99)
-# v.set_name('gggg')
-# v.set_scratch(True)
-# w.focus_view(v)
-
-v = panel
-
-panel.run_command('insert',{"characters":"sfsdfs"})
-panel.run_command('insert',{"characters":"\nsfsdfs"})
-
-panel.window_to_layout((1,4))
-# set_scratch
-
-# panel.run_command('seajs')
-# print(panel.buffer_id())
-# panel.is_read_only()
-# w.run_command('show_panel',{"panel":"output.ftp"})
-panel.is_read_only()
-# w.run_command('hide_panel',{"panel":"output.sftp"})
-
-
-# print(w.active_view().encoding())
-# print(w.active_view().set_encoding('UTF-8'))
-
-# w.create_output_panel('sftp')
-
-
-
-# sublime.run_command("show_panel",{"panel":"output.ftp"})
-# sublime.run_command("show_panel",{"panel":"console"})
 # Show input panel
 # w.show_input_panel('','welcome',lambda str:sublime.error_message('ok'),lambda str:print(str),lambda:print(11))
 
 # Show a panel with quick choose
 # w.show_quick_panel('4554545',lambda chid:sublime.error_message('f'))
 
-# w = sublime.active_window()
-# v = w.active_view()
-# v.set_encoding('UTF-8')`
-# v.encoding() == UTF-8
-
-
-# w = sublime.active_window()
-# v = w.active_view()
+# Set view's encode
+# view.set_encoding('UTF-8')`
+# view.encoding() == UTF-8
 
 reload_mods = []
 for mod in sys.modules:

@@ -3,11 +3,8 @@ import  sublime,sublime_plugin
 import  os
 from    .filetransfer import FileTransfer as Ftp
 import  json
-import  ftplib
-import  re
-from    ..FTP import DEFAULT_CONFIG,DEFAULT_CONFIG_PATH
+from    ..FTP import DEFAULT_CONFIG,DEFAULT_CONFIG_PATH,LOG_PANEL,ACTIVE_WINDOW
 import  threading
-import  time
 
 #Instance of Ftp
 FTP         = False
@@ -16,10 +13,12 @@ LOCAL_PATH = False
 # A json object for FTP
 FTP_CONFIG = False
 
+# Get a FTP object
 def getFtp(path):
     global FTP
     global LOCAL_PATH
     global FTP_CONFIG
+    global LOG_PANEL
 
     tmp = getLocalPath(path)
     if False == tmp:
@@ -28,7 +27,7 @@ def getFtp(path):
         if False != FTP:
             FTP.close()
             FTP = False
-        print('Load configuration file failed')
+        LOG_PANEL.run_command('insert',{"characters":"Load configuration file failed\n"})
         return
 
     if tmp != LOCAL_PATH:
@@ -45,7 +44,7 @@ def getFtp(path):
         if False != FTP:
             FTP.close()
             FTP = False
-        print('Load configuration file failed')
+        LOG_PANEL.run_command('insert',{"characters":"Load configuration file failed\n"})
         return
 
     if False == FTP_CONFIG:
@@ -63,20 +62,20 @@ def getFtp(path):
         if True == FTP.checkConnect():
             pass
         else:
-            print('connect is disable')
+            LOG_PANEL.run_command('insert',{"characters":"Connect is disable\n"})
             FTP = False
     if False == FTP:
         try:
+            msg = 'Connecting to FTP server '+config['host']+' as '+config['user']+'......................' 
+            LOG_PANEL.run_command('insert',{"characters":msg})
             FTP = Ftp(config)
-        except(ftplib.error_perm):
-            FTP = False
-            print('Connection '+ config['host'] +' failure')
-        try:
             FTP.Login()
-        except(ftplib.error_perm):
+            LOG_PANEL.run_command('insert',{"characters":"success\n"})
+        except Exception:
             FTP = False
-            print('Login failure as ' + config['user'])
+            LOG_PANEL.run_command('insert',{"characters":"\nConnection timed out\n"})
 
+# Load config content
 def getConfig(localDir):
     try:
         fp     = open(os.path.join(localDir,'ftp-config.json') ,'r',encoding = 'utf-8')
@@ -88,6 +87,7 @@ def getConfig(localDir):
     except Exception:
         return False
 
+# Get path for local directory
 def getLocalPath(path):
     fileDir = (os.path.split(path))[0]
     tmp     = ''
@@ -101,6 +101,7 @@ def getLocalPath(path):
         return False
     return getLocalPath(fileDir)
 
+# Get path for remote directory
 def getRemotePath(localDir,path):
     config = getConfig(localDir)
     if False == config:
@@ -108,7 +109,7 @@ def getRemotePath(localDir,path):
     try:
         remotePath = config['remote_path']
     except Exception:
-        print('Failed get remote_path from config file')
+        LOG_PANEL.run_command('insert',{"characters":"Failed get remote_path from config file\n"})
         return False
     #If it doesn't end with "/"
     if remotePath[-1] != "/":
@@ -119,6 +120,7 @@ def getRemotePath(localDir,path):
     remotePath  = remotePath + tmp
     return remotePath
 
+# Check command is valid
 def valid(**args):
     config_path = getLocalPath(args['path'])
     if False == config_path:
@@ -154,22 +156,83 @@ def valid(**args):
     else:
         return False
 
-# Handle command,增加一个线程，和当前线程通信，根据状态打印响应信息
+# Execute a command
 def executeCommand(command,path):
-    getFtp(path)
+    global ACTIVE_WINDOW
+    global LOG_PANEL
     global FTP
     global LOCAL_PATH
+    
+    if None == sublime.active_window().find_output_panel('aftp'):
+        ACTIVE_WINDOW = sublime.active_window()
+        LOG_PANEL     = ACTIVE_WINDOW.create_output_panel('aftp')
+
+    ACTIVE_WINDOW.run_command('show_panel',{"panel":"output.aftp"})
+    localDir = getLocalPath(path)
+    config   = getConfig(localDir)
+    if False == config:
+        LOG_PANEL.run_command('insert',{"characters":"Failed to load config\n"})
+        return False
+
+    getFtp(path)
     if(FTP == False):
         return
 
-    'FtpUploadFile'           == command and FTP.UploadFile(path,getRemotePath(LOCAL_PATH,path))
-    'FtpDownloadFile'         == command and FTP.DownloadFile(path,getRemotePath(LOCAL_PATH,path))
-    'FtpDeleteRemoteFile'     == command and FTP.DeleteRemoteFile(path,getRemotePath(LOCAL_PATH,path))
-    'FtpUploadFolder'         == command and FTP.UploadFolder(path,getRemotePath(LOCAL_PATH,path))
-    'FtpDownloadFolder'       == command and FTP.DownloadFolder(path,getRemotePath(LOCAL_PATH,path))
-    'FtpDeleteRemoteFolder'   == command and FTP.DeleteRemoteFolder(path,getRemotePath(LOCAL_PATH,path))
-    'FtpDiffRemoteFile'       == command and FTP.DiffRemoteFile(path,getRemotePath(LOCAL_PATH,path))
+    remote_path = getRemotePath(LOCAL_PATH,path)
+    try:
+        if 'FtpUploadFile' == command:
+            msg = 'Uploading remote file:'+remote_path+'....................................'
+            LOG_PANEL.run_command('insert',{"characters":msg})
+            FTP.UploadFile(path,remote_path)
 
+        if 'FtpDownloadFile' == command:
+            msg = 'Downloading remote file:'+remote_path+'....................................'
+            LOG_PANEL.run_command('insert',{"characters":msg})
+            FTP.UploadFile(path,remote_path)
+        
+        if 'FtpDeleteRemoteFile' == command:
+            msg = 'Deleting remote file'+remote_path+'.......................................'
+            LOG_PANEL.run_command('insert',{"characters":msg})
+            FTP.DeleteRemoteFile(path,remote_path)
+
+        if 'FtpUploadFolder' == command:
+             msg = 'Uploading remote folder:'+remote_path+'....................................'
+             LOG_PANEL.run_command('insert',{"characters":msg})
+             FTP.UploadFolder(path,remote_path)
+
+        if 'FtpDownloadFolder' == command:
+            msg = 'Downloading remote folder:'+remote_path+'....................................'
+            LOG_PANEL.run_command('insert',{"characters":msg})
+            FTP.DownloadFolder(path,remote_path)
+
+        if 'FtpDeleteRemoteFolder' == command:
+            msg = 'Deleting remote folder'+remote_path+'....................................'
+            LOG_PANEL.run_command('insert',{"characters":msg})
+            FTP.DeleteRemoteFolder(path,remote_path)
+
+        if 'FtpDiffRemoteFile' == command:
+             msg = 'Comparing remote file:'+remote_path+'....................................'
+             LOG_PANEL.run_command('insert',{"characters":msg})
+             FTP.DiffRemoteFile(path,remote_path)
+
+        LOG_PANEL.run_command('insert',{"characters":'success\n'})
+
+    except Exception:
+        if 'FtpUploadFile' == command:
+            msg = '\nFailed to upload local file\n'
+        if 'FtpDeleteRemoteFile'   == command:
+            msg = '\nFailed to delete remote file\n'
+        if 'FtpUploadFolder'       == command:
+            msg = '\nFailed to upload local folder\n'
+        if 'FtpDownloadFolder'     == command:
+            msg = '\nFailed to download remote folder\n'
+        if 'FtpDeleteRemoteFolder' == command:
+            msg = '\nFailed to delete remote folder\n'
+        if 'FtpDiffRemoteFile'     == command:
+            msg = '\nFailed to compare remote file\n'
+        LOG_PANEL.run_command('insert',{"characters":msg})
+
+# A command that upload file to remote server
 class FtpUploadFileCommand(sublime_plugin.TextCommand):
 
     def run(self,edit,**args):
@@ -181,19 +244,15 @@ class FtpUploadFileCommand(sublime_plugin.TextCommand):
         t = threading.Thread(target = executeCommand,args=('FtpUploadFile',path,))
         t.start()
 
-    #命令是否可用
+    # Command is enabled
     def is_enabled(self,**args):
         return FtpUploadFileCommand._check(self,**args)
 
-    #命令是否可见
+    # Command is visible
     def is_visible(self,**args):
         return FtpUploadFileCommand._check(self,**args)
 
-    #是否允许接收事件（鼠标）参数
-    def want_event(self):
-        return False
-
-    #
+    # Check command is valid
     def _check(self,**args):
         try:
             path = args['paths'][0]
@@ -207,6 +266,7 @@ class FtpUploadFileCommand(sublime_plugin.TextCommand):
 
         return valid(**paragrams)
 
+# A command that download file from remote server
 class FtpDownloadFileCommand(sublime_plugin.TextCommand):
     def run(self,edit,**args):
         try:
@@ -217,19 +277,15 @@ class FtpDownloadFileCommand(sublime_plugin.TextCommand):
         t = threading.Thread(target = executeCommand,args=('FtpDownloadFile',path,))
         t.start()
 
-    #命令是否可用
+    # Command is enabled
     def is_enabled(self,**args):
         return FtpDownloadFileCommand._check(self,**args)
 
-    #命令是否可见
+    # Command is visible
     def is_visible(self,**args):
         return FtpDownloadFileCommand._check(self,**args)
 
-    #是否允许接收事件（鼠标）参数
-    def want_event(self):
-        return False
-
-    #
+    # Check command is valid
     def _check(self,**args):
         try:
             path = args['paths'][0]
@@ -243,6 +299,7 @@ class FtpDownloadFileCommand(sublime_plugin.TextCommand):
 
         return valid(**paragrams)
 
+# A command that delete file from remote server
 class FtpDeleteRemoteFileCommand(sublime_plugin.TextCommand):
     def run(self,edit,**args):
         try:
@@ -263,15 +320,12 @@ class FtpDeleteRemoteFileCommand(sublime_plugin.TextCommand):
         t = threading.Thread(target = executeCommand,args=('FtpDeleteRemoteFile',path,))
         t.start()
 
-    #命令是否可用
     def is_enabled(self,**args):
         return FtpDeleteRemoteFileCommand._check(self,**args)
 
-    #命令是否可见
     def is_visible(self,**args):
         return FtpDeleteRemoteFileCommand._check(self,**args)
 
-    #
     def _check(self,**args):
         try:
             path = args['paths'][0]
@@ -285,6 +339,7 @@ class FtpDeleteRemoteFileCommand(sublime_plugin.TextCommand):
 
         return valid(**paragrams)
 
+# A command that delete folder from remote server
 class FtpDeleteRemoteFolderCommand(sublime_plugin.TextCommand):
     def run(self,edit,**args):
         path = args['paths'][0]
@@ -301,15 +356,12 @@ class FtpDeleteRemoteFolderCommand(sublime_plugin.TextCommand):
         t = threading.Thread(target = executeCommand,args=('FtpDeleteRemoteFolder',path,))
         t.start()
 
-    #命令是否可用
     def is_enabled(self,**args):
         return FtpDeleteRemoteFolderCommand._check(self,**args)
 
-    #命令是否可见
     def is_visible(self,**args):
         return FtpDeleteRemoteFolderCommand._check(self,**args)
 
-    #
     def _check(self,**args):
         paragrams = {}
         paragrams['path']           = args['paths'][0]
@@ -318,6 +370,7 @@ class FtpDeleteRemoteFolderCommand(sublime_plugin.TextCommand):
 
         return valid(**paragrams)
 
+# A command that upload folder to remote server
 class FtpUploadFolderCommand(sublime_plugin.TextCommand):
     def run(self,edit,**args):
         path = args['paths'][0]
@@ -325,15 +378,12 @@ class FtpUploadFolderCommand(sublime_plugin.TextCommand):
         t = threading.Thread(target = executeCommand,args=('FtpUploadFolder',path,))
         t.start()
 
-    #命令是否可用
     def is_enabled(self,**args):
         return FtpUploadFolderCommand._check(self,**args)
 
-    #命令是否可见
     def is_visible(self,**args):
         return FtpUploadFolderCommand._check(self,**args)
 
-    #
     def _check(self,**args):
         paragrams = {}
         paragrams['path']   = args['paths'][0]
@@ -342,6 +392,7 @@ class FtpUploadFolderCommand(sublime_plugin.TextCommand):
 
         return valid(**paragrams)
 
+# A command that download folder from remote server
 class FtpDownloadFolderCommand(sublime_plugin.TextCommand):
     def run(self,edit,**args):
         path = args['paths'][0]
@@ -349,15 +400,12 @@ class FtpDownloadFolderCommand(sublime_plugin.TextCommand):
         t = threading.Thread(target = executeCommand,args=('FtpDownloadFolder',path,))
         t.start()
 
-    #命令是否可用
     def is_enabled(self,**args):
         return FtpDownloadFolderCommand._check(self,**args)
 
-    #命令是否可见
     def is_visible(self,**args):
         return FtpDownloadFolderCommand._check(self,**args)
 
-    #
     def _check(self,**args):
         paragrams = {}
         paragrams['path']   = args['paths'][0]
@@ -366,6 +414,7 @@ class FtpDownloadFolderCommand(sublime_plugin.TextCommand):
 
         return valid(**paragrams)
 
+# A command that compare file local with remote server
 class FtpDiffRemoteFileCommand(sublime_plugin.TextCommand):
     def run(self,edit,**args):
         try:
@@ -375,15 +424,13 @@ class FtpDiffRemoteFileCommand(sublime_plugin.TextCommand):
 
         t = threading.Thread(target = executeCommand,args=('FtpDiffRemoteFile',path,))
         t.start()
-    #命令是否可用
+
     def is_enabled(self,**args):
         return FtpDiffRemoteFileCommand._check(self,**args)
 
-    #命令是否可见
     def is_visible(self,**args):
         return FtpDiffRemoteFileCommand._check(self,**args)
 
-    #
     def _check(self,**args):
         try:
             path = args['paths'][0]
@@ -419,15 +466,12 @@ class FtpMapToRemoteCommand(sublime_plugin.TextCommand):
         default_conf.close()
         conf.close()
 
-    #命令是否可用
     def is_enabled(self,**args):
         return FtpMapToRemoteCommand._check(self,**args)
 
-    #命令是否可见
     def is_visible(self,**args):
         return FtpMapToRemoteCommand._check(self,**args)
 
-    #
     def _check(self,**args):
         try:
             path = args['paths'][0]
