@@ -158,6 +158,11 @@ class FileTransfer:
         diff_view     = sublime.active_window().open_file(diff_path)
         diff_view.set_scratch(True)
 
+        try:
+            os.remove(tmp_file)
+        except Exception:
+            pass
+
     def __destoryFolder(self,path):
         try:
             self.ftp.rmd(path)
