@@ -141,7 +141,7 @@ class FileTransfer:
         file_extension  = os.path.splitext(LocalDir)
         file_name       = os.path.split(LocalDir)
         tmp_file        = os.path.join(self.plugin_cache,'10xsdfs00diff'+file_extension[1])
-        diff_path       = os.path.join(self.plugin_cache,'remote-'+file_name[1]+'————local-'+file_name[1])
+        diff_path       = os.path.join(self.plugin_cache,'(remote)'+file_name[1]+'---(local)'+file_name[1])
 
         self.DownloadFile(tmp_file,RemoteDir)
 
