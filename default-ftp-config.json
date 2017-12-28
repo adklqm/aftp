@@ -1,6 +1,5 @@
 {
   "type": "ftp",
-  "save_before_upload": true,
   "upload_on_save": false,
   "host": "127.0.0.1",
   "user": "username",
@@ -8,5 +7,6 @@
   "remote_path": "/",
   "port":21,
   "connect_timeout": 15,
-  "ftp_passive_mode": true
+  "ftp_passive_mode": true,
+  "ignore":["ftp-config.json"]
 }

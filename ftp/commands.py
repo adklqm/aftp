@@ -3,7 +3,7 @@ import  sublime,sublime_plugin
 import  os
 from    .filetransfer import FileTransfer as Ftp
 import  json
-from    ..FTP import DEFAULT_CONFIG,DEFAULT_CONFIG_PATH,LOG_PANEL,ACTIVE_WINDOW
+from    ..FTP import DEFAULT_CONFIG,DEFAULT_CONFIG_PATH
 import  threading
 
 #Instance of Ftp
@@ -18,7 +18,8 @@ def getFtp(path):
     global FTP
     global LOCAL_PATH
     global FTP_CONFIG
-    global LOG_PANEL
+
+    log_panel = sublime.active_window().find_output_panel('aftp')
 
     tmp = getLocalPath(path)
     if False == tmp:
@@ -27,7 +28,7 @@ def getFtp(path):
         if False != FTP:
             FTP.close()
             FTP = False
-        LOG_PANEL.run_command('insert',{"characters":"Load configuration file failed\n"})
+        log_panel.run_command('append',{"characters":"Load configuration file failed\n"})
         return
 
     if tmp != LOCAL_PATH:
@@ -44,7 +45,7 @@ def getFtp(path):
         if False != FTP:
             FTP.close()
             FTP = False
-        LOG_PANEL.run_command('insert',{"characters":"Load configuration file failed\n"})
+        log_panel.run_command('append',{"characters":"Load configuration file failed\n"})
         return
 
     if False == FTP_CONFIG:
@@ -62,18 +63,18 @@ def getFtp(path):
         if True == FTP.checkConnect():
             pass
         else:
-            LOG_PANEL.run_command('insert',{"characters":"Connect is disable\n"})
+            log_panel.run_command('append',{"characters":"Connect is disable\n"})
             FTP = False
     if False == FTP:
         try:
-            msg = 'Connecting to FTP server '+config['host']+' as '+config['user']+'......................' 
-            LOG_PANEL.run_command('insert',{"characters":msg})
+            msg = 'Connecting to FTP server '+config['host']+' as '+config['user']+'......................'
+            log_panel.run_command('append',{"characters":msg})
             FTP = Ftp(config)
             FTP.Login()
-            LOG_PANEL.run_command('insert',{"characters":"success\n"})
+            log_panel.run_command('append',{"characters":"success\n"})
         except Exception:
             FTP = False
-            LOG_PANEL.run_command('insert',{"characters":"\nConnection timed out\n"})
+            log_panel.run_command('append',{"characters":"\nConnection timed out\n"})
 
 # Load config content
 def getConfig(localDir):
@@ -109,7 +110,7 @@ def getRemotePath(localDir,path):
     try:
         remotePath = config['remote_path']
     except Exception:
-        LOG_PANEL.run_command('insert',{"characters":"Failed get remote_path from config file\n"})
+        sublime.active_window().find_output_panel('aftp').run_command('append',{"characters":"Failed get remote_path from config file\n"})
         return False
     #If it doesn't end with "/"
     if remotePath[-1] != "/":
@@ -158,20 +159,19 @@ def valid(**args):
 
 # Execute a command
 def executeCommand(command,path):
-    global ACTIVE_WINDOW
-    global LOG_PANEL
     global FTP
     global LOCAL_PATH
-    
-    if None == sublime.active_window().find_output_panel('aftp'):
-        ACTIVE_WINDOW = sublime.active_window()
-        LOG_PANEL     = ACTIVE_WINDOW.create_output_panel('aftp')
 
-    ACTIVE_WINDOW.run_command('show_panel',{"panel":"output.aftp"})
+    active_window = sublime.active_window()
+    log_panel     = active_window.find_output_panel('aftp')
+    if None == log_panel:
+        log_panel     = active_window.create_output_panel('aftp')
+
+    active_window.run_command('show_panel',{"panel":"output.aftp"})
     localDir = getLocalPath(path)
     config   = getConfig(localDir)
     if False == config:
-        LOG_PANEL.run_command('insert',{"characters":"Failed to load config\n"})
+        log_panel.run_command('append',{"characters":"Failed to load config\n"})
         return False
 
     getFtp(path)
@@ -181,41 +181,47 @@ def executeCommand(command,path):
     remote_path = getRemotePath(LOCAL_PATH,path)
     try:
         if 'FtpUploadFile' == command:
+            try:
+                ignore = config['ignore']
+                if os.path.split(path)[1] in ignore:
+                    return
+            except Exception:
+                pass
             msg = 'Uploading remote file:'+remote_path+'....................................'
-            LOG_PANEL.run_command('insert',{"characters":msg})
+            log_panel.run_command('append',{"characters":msg})
             FTP.UploadFile(path,remote_path)
 
         if 'FtpDownloadFile' == command:
             msg = 'Downloading remote file:'+remote_path+'....................................'
-            LOG_PANEL.run_command('insert',{"characters":msg})
+            log_panel.run_command('append',{"characters":msg})
             FTP.UploadFile(path,remote_path)
-        
+
         if 'FtpDeleteRemoteFile' == command:
             msg = 'Deleting remote file'+remote_path+'.......................................'
-            LOG_PANEL.run_command('insert',{"characters":msg})
+            log_panel.run_command('append',{"characters":msg})
             FTP.DeleteRemoteFile(path,remote_path)
 
         if 'FtpUploadFolder' == command:
              msg = 'Uploading remote folder:'+remote_path+'....................................'
-             LOG_PANEL.run_command('insert',{"characters":msg})
+             log_panel.run_command('append',{"characters":msg})
              FTP.UploadFolder(path,remote_path)
 
         if 'FtpDownloadFolder' == command:
             msg = 'Downloading remote folder:'+remote_path+'....................................'
-            LOG_PANEL.run_command('insert',{"characters":msg})
+            log_panel.run_command('append',{"characters":msg})
             FTP.DownloadFolder(path,remote_path)
 
         if 'FtpDeleteRemoteFolder' == command:
             msg = 'Deleting remote folder'+remote_path+'....................................'
-            LOG_PANEL.run_command('insert',{"characters":msg})
+            log_panel.run_command('append',{"characters":msg})
             FTP.DeleteRemoteFolder(path,remote_path)
 
         if 'FtpDiffRemoteFile' == command:
              msg = 'Comparing remote file:'+remote_path+'....................................'
-             LOG_PANEL.run_command('insert',{"characters":msg})
+             log_panel.run_command('append',{"characters":msg})
              FTP.DiffRemoteFile(path,remote_path)
 
-        LOG_PANEL.run_command('insert',{"characters":'success\n'})
+        log_panel.run_command('append',{"characters":'success\n'})
 
     except Exception:
         if 'FtpUploadFile' == command:
@@ -230,7 +236,7 @@ def executeCommand(command,path):
             msg = '\nFailed to delete remote folder\n'
         if 'FtpDiffRemoteFile'     == command:
             msg = '\nFailed to compare remote file\n'
-        LOG_PANEL.run_command('insert',{"characters":msg})
+        log_panel.run_command('append',{"characters":msg})
 
 # A command that upload file to remote server
 class FtpUploadFileCommand(sublime_plugin.TextCommand):

@@ -49,14 +49,18 @@ class FileTransfer:
 
     #Upload a file to remote's server
     def UploadFile( self, LocalFile, RemoteFile ):
-
         if False == os.path.isfile( LocalFile ):
             return False
+        try:
+            ignore = self.conf['ignore']
+            if os.path.split(LocalFile)[1] in ignore:
+                return
+        except Exception:
+            pass
 
         file_handler = open( LocalFile, "rb")
         self.ftp.storbinary( 'STOR %s' % RemoteFile, file_handler, 4096 )
         file_handler.close()
-        return True
 
     def DeleteRemoteFile(self,LocalFile,RemoteDir):
         if True == self.isDir(RemoteDir):
@@ -124,7 +128,7 @@ class FileTransfer:
         self.__destoryFolder(RemoteDir)
         return True
 
-    # Compare file local with remote 
+    # Compare file local with remote
     def DiffRemoteFile(self,LocalDir,RemoteDir):
         if False == os.path.isfile(LocalDir):
             return False
@@ -154,7 +158,6 @@ class FileTransfer:
             os.remove(diff_path)
         except Exception:
             pass
-            
         try:
             os.remove(tmp_file)
         except Exception:
@@ -185,7 +188,7 @@ class FileTransfer:
             return False
         return True
 
-    # Check remote folder is empty  
+    # Check remote folder is empty
     def __isEmptyFloder(self,path):
         files = self.ftp.nlst()
         for file in files:
