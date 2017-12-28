@@ -48,15 +48,20 @@ def getFtp(path):
         log_panel.run_command('append',{"characters":"Load configuration file failed\n"})
         return
 
+    config['local_path'] = LOCAL_PATH
+
     if False == FTP_CONFIG:
         FTP_CONFIG = config
     elif (config == FTP_CONFIG):
         pass
     else:
+        tmp_conf = FTP_CONFIG
         FTP_CONFIG = config
-        if False != FTP:
-            FTP.close()
-            FTP = False
+        if (tmp_conf['host'] != config['host'] or tmp_conf['user'] != config['user']
+             or tmp_conf['password'] != config['password'] or tmp_conf['ftp_passive_mode'] != config['ftp_passive_mode']):
+            if False != FTP:
+                FTP.close()
+                FTP = False
 
     # Check FTP isn't valid
     if False != FTP:
@@ -65,6 +70,7 @@ def getFtp(path):
         else:
             log_panel.run_command('append',{"characters":"Connect is disable\n"})
             FTP = False
+
     if False == FTP:
         try:
             msg = 'Connecting to FTP server '+config['host']+' as '+config['user']+'......................'
@@ -175,7 +181,7 @@ def executeCommand(command,path):
         return False
 
     getFtp(path)
-    if(FTP == False):
+    if False == FTP:
         return
 
     remote_path = getRemotePath(LOCAL_PATH,path)
@@ -202,9 +208,22 @@ def executeCommand(command,path):
             FTP.DeleteRemoteFile(path,remote_path)
 
         if 'FtpUploadFolder' == command:
-             msg = 'Uploading remote folder:'+remote_path+'....................................'
-             log_panel.run_command('append',{"characters":msg})
-             FTP.UploadFolder(path,remote_path)
+            try:
+                ignore = config['ignore']
+            except:
+                ignore = []
+                pass
+            for ignore_file in ignore:
+                if -1 != ignore_file.find('/'):
+                    if ignore_file[-1] != '/':
+                        ignore_file = ignore_file + '/'
+
+                    ignore_file = ignore_file.replace("/",os.path.sep)
+                    if os.path.join(LOCAL_PATH,ignore_file) == path + os.path.sep:
+                        return
+            msg = 'Uploading remote folder:'+remote_path+'....................................'
+            log_panel.run_command('append',{"characters":msg})
+            FTP.UploadFolder(path,remote_path)
 
         if 'FtpDownloadFolder' == command:
             msg = 'Downloading remote folder:'+remote_path+'....................................'

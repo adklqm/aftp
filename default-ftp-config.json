@@ -1,12 +1,18 @@
 {
   "type": "ftp",
   "upload_on_save": false,
-  "host": "127.0.0.1",
-  "user": "username",
-  "password": "password",
-  "remote_path": "/",
+  "host": "Your remote host address,example:127.0.0.1",
+  "user": "Your username for FTP server,example:username",
+  "password": "Your password for FTP server,example:password",
+  "remote_path": "Root path that remote server, example:/Application/Home",
   "port":21,
   "connect_timeout": 15,
   "ftp_passive_mode": true,
-  "ignore":["ftp-config.json"]
+  "ignore":
+  ["ftp-config.json"
+    ,".gitignore"
+    ,"sftp-config.json"
+    ,".git/"
+    ,".idea/"
+  ]
 }

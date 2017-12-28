@@ -11,12 +11,13 @@ class FileTransfer:
     path    = ""
     conf    = ""
     plugin_cache = ""
+    local_path = ""
 
     def __init__( self,conf):
         self.plugin_cache = os.path.join(sublime.cache_path(),'FTP')
         self.conf = conf
         #Open debug,level's val with 0,1,2.
-        self.ftp.set_debuglevel(1)
+        self.ftp.set_debuglevel(0)
         #0 active mode, 1 passive
         self.ftp.set_pasv(conf['ftp_passive_mode'])
         #Connect host
@@ -75,6 +76,19 @@ class FileTransfer:
         if False == os.path.isdir(LocalDir):
             return False
 
+        try:
+            ignore = self.conf['ignore']
+        except:
+            ignore = []
+            pass
+
+        for ignore_file in ignore:
+            if -1 != ignore_file.find('/'):
+                if ignore_file[-1] != '/':
+                    ignore_file = ignore_file + '/'
+                ignore_file = ignore_file.replace("/",os.path.sep)
+                if os.path.join(self.conf['local_path'],ignore_file) == LocalDir + os.path.sep:
+                    return
         if False == self.isDir(RemoteDir):
             self.ftp.mkd(RemoteDir)
 
