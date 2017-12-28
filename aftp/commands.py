@@ -174,6 +174,16 @@ def executeCommand(command,path):
         log_panel     = active_window.create_output_panel('aftp')
 
     active_window.run_command('show_panel',{"panel":"output.aftp"})
+
+    if False == os.path.exists(os.path.join(sublime.cache_path(),'AFTP')):
+        try:
+            os.mkdir(os.path.join(sublime.cache_path(),'AFTP'))
+        except Exception:
+            log_panel.run_command('append',
+                {"characters":"Failed to create temp directory:"
+                + os.path.join(sublime.cache_path(),'AFTP')+'\n'})
+            return False
+
     localDir = getLocalPath(path)
     config   = getConfig(localDir)
     if False == config:

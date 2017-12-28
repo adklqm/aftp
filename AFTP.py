@@ -18,12 +18,6 @@ fp.close()
 ACTIVE_WINDOW = sublime.active_window()
 LOG_PANEL     = ACTIVE_WINDOW.create_output_panel("aftp")
 
-if False == os.path.exists(os.path.join(sublime.cache_path(),'AFTP')):
-    try:
-        os.mkdir(os.path.join(sublime.cache_path(),'AFTP'))
-    except Exception:
-        raise Exception
-
 # Set sublime text version
 st_version = 2
 if int(sublime.version()) > 3000:

@@ -10,7 +10,7 @@
   "ftp_passive_mode": true,
   "ignore":
   [
-    "ftp-config.json"
+    "aftp-config.json"
     ,".gitignore"
     ,"sftp-config.json"
     ,".git/"
