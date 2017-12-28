@@ -1,16 +1,16 @@
 [
     { "caption": "-" },
     {
-        "caption": "FTP",
+        "caption": "AFTP",
         "children":
         [
-            { "caption": "Upload File", "command": "ftp_upload_file" },
-            { "caption": "Download File", "command": "ftp_download_file" },
+            { "caption": "Upload File", "command": "aftp_upload_file" },
+            { "caption": "Download File", "command": "aftp_download_file" },
             { "caption": "-" },
-            { "caption": "Diff Remote File", "command": "ftp_diff_remote_file" },
+            { "caption": "Diff Remote File", "command": "aftp_diff_remote_file" },
             { "caption": "-" },
-            { "caption": "Delete Remote File", "command": "ftp_delete_remote_file"},
-            { "caption": "Map to Remote...", "command": "ftp_map_to_remote"}
+            { "caption": "Delete Remote File", "command": "aftp_delete_remote_file"},
+            { "caption": "Map to Remote...", "command": "aftp_map_to_remote"}
         ]
     }
 ]

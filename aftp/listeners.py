@@ -3,7 +3,7 @@
 import sublime,sublime_plugin,json
 from   .commands import getConfig,getLocalPath
 
-class FtpAutoConnectListener(sublime_plugin.EventListener):
+class AftpAutoConnectListener(sublime_plugin.EventListener):
 
     #Called just before a view is saved.
     def on_pre_save(self,edit):
@@ -22,4 +22,4 @@ class FtpAutoConnectListener(sublime_plugin.EventListener):
                 return
         except Exception:
             return
-        active_window.run_command('ftp_upload_file',{"paths":[]})
+        active_window.run_command('aftp_upload_file',{"paths":[]})

@@ -6,26 +6,26 @@ import difflib
 import sublime
 
 class FileTransfer:
-    ftp     = ftplib.FTP()
-    bIsDir  = False
-    path    = ""
-    conf    = ""
+    aftp         = ftplib.FTP()
+    bIsDir       = False
+    path         = ""
+    conf         = ""
     plugin_cache = ""
-    local_path = ""
+    local_path   = ""
 
     def __init__( self,conf):
-        self.plugin_cache = os.path.join(sublime.cache_path(),'FTP')
+        self.plugin_cache = os.path.join(sublime.cache_path(),'AFTP')
         self.conf = conf
         #Open debug,level's val with 0,1,2.
-        self.ftp.set_debuglevel(0)
+        self.aftp.set_debuglevel(2)
         #0 active mode, 1 passive
-        self.ftp.set_pasv(conf['ftp_passive_mode'])
+        self.aftp.set_pasv(conf['ftp_passive_mode'])
         #Connect host
-        self.ftp.connect( conf['host'], conf['port'] )
+        self.aftp.connect( conf['host'], conf['port'] )
 
     #Login to remote's server
     def Login( self):
-        self.ftp.login( self.conf['user'],self.conf['password'] )
+        self.aftp.login( self.conf['user'],self.conf['password'] )
 
     #Download a file from remote's server
     def DownloadFile( self, LocalFile, RemoteFile ):
@@ -36,7 +36,7 @@ class FileTransfer:
         except Exception:
             pass
         try:
-            self.ftp.retrbinary( "RETR %s" % ( RemoteFile ), file_buffer.write )
+            self.aftp.retrbinary( "RETR %s" % ( RemoteFile ), file_buffer.write )
             file_buffer.close()
         except Exception:
             pass
@@ -60,14 +60,14 @@ class FileTransfer:
             pass
 
         file_handler = open( LocalFile, "rb")
-        self.ftp.storbinary( 'STOR %s' % RemoteFile, file_handler, 4096 )
+        self.aftp.storbinary( 'STOR %s' % RemoteFile, file_handler, 4096 )
         file_handler.close()
 
     def DeleteRemoteFile(self,LocalFile,RemoteDir):
         if True == self.isDir(RemoteDir):
             return False
         try:
-            self.ftp.delete(RemoteDir)
+            self.aftp.delete(RemoteDir)
         except Exception:
             pass
 
@@ -90,9 +90,9 @@ class FileTransfer:
                 if os.path.join(self.conf['local_path'],ignore_file) == LocalDir + os.path.sep:
                     return
         if False == self.isDir(RemoteDir):
-            self.ftp.mkd(RemoteDir)
+            self.aftp.mkd(RemoteDir)
 
-        self.ftp.cwd( RemoteDir )
+        self.aftp.cwd( RemoteDir )
 
         LocalNames = os.listdir(LocalDir)
         path = ''
@@ -103,7 +103,7 @@ class FileTransfer:
             else:
                 self.UploadFile( path, file )
 
-        self.ftp.cwd( ".." )
+        self.aftp.cwd( ".." )
 
     #Download a folder from remote's sever
     def DownloadFolder( self, LocalDir, RemoteDir ):
@@ -111,9 +111,9 @@ class FileTransfer:
         if False == os.path.isdir( LocalDir ):
             os.makedirs( LocalDir )
 
-        self.ftp.cwd( RemoteDir )
+        self.aftp.cwd( RemoteDir )
 
-        RemoteNames = self.ftp.nlst()
+        RemoteNames = self.aftp.nlst()
         path = ''
         for file in RemoteNames:
             path = os.path.join( LocalDir, file )
@@ -122,15 +122,15 @@ class FileTransfer:
             else:
                 self.DownloadFile( path, file )
 
-        self.ftp.cwd( ".." )
+        self.aftp.cwd( ".." )
 
     #Delete a folder from remote's server
     def DeleteRemoteFolder( self, LocalDir, RemoteDir ):
         if False == self.isDir(RemoteDir):
             return False
 
-        self.ftp.cwd( RemoteDir )
-        RemoteNames = self.ftp.nlst()
+        self.aftp.cwd( RemoteDir )
+        RemoteNames = self.aftp.nlst()
 
         for file in RemoteNames:
             if self.isDir( file ):
@@ -138,7 +138,7 @@ class FileTransfer:
             else:
                 self.DeleteRemoteFile(LocalDir,file)
 
-        self.ftp.cwd('..')
+        self.aftp.cwd('..')
         self.__destoryFolder(RemoteDir)
         return True
 
@@ -180,37 +180,37 @@ class FileTransfer:
     # Delete remote folder
     def __destoryFolder(self,path):
         try:
-            self.ftp.rmd(path)
+            self.aftp.rmd(path)
         except Exception:
             pass
 
     # Check whether the remote's path is a directory
     def isDir( self, path ):
         try:
-            self.ftp.cwd(path)
+            self.aftp.cwd(path)
         except Exception as e:
             return False
         else:
-            self.ftp.cwd('..')
+            self.aftp.cwd('..')
             return True
 
     # Check connect is enable
     def checkConnect(self):
         try:
-            self.ftp.nlst()
+            self.aftp.nlst()
         except Exception as e:
             return False
         return True
 
     # Check remote folder is empty
     def __isEmptyFloder(self,path):
-        files = self.ftp.nlst()
+        files = self.aftp.nlst()
         for file in files:
             return False
         return True
     #Close ftp connect
     def close( self ):
-        self.ftp.quit()
+        self.aftp.quit()
 
     # Load file content
     def readfile(self,filename):

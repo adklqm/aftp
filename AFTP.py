@@ -18,9 +18,9 @@ fp.close()
 ACTIVE_WINDOW = sublime.active_window()
 LOG_PANEL     = ACTIVE_WINDOW.create_output_panel("aftp")
 
-if False == os.path.exists(os.path.join(sublime.cache_path(),'FTP')):
+if False == os.path.exists(os.path.join(sublime.cache_path(),'AFTP')):
     try:
-        os.mkdir(os.path.join(sublime.cache_path(),'FTP'))
+        os.mkdir(os.path.join(sublime.cache_path(),'AFTP'))
     except Exception:
         raise Exception
 
@@ -58,7 +58,7 @@ reloading = {
 
 reload_mods = []
 for mod in sys.modules:
-    if (mod[0:7] == 'FTP.ftp' or mod[0:4] == 'ftp.' or mod == 'ftp') and sys.modules[mod] is not None:
+    if (mod[0:7] == 'AFTP.aftp' or mod[0:4] == 'aftp.' or mod == 'aftp') and sys.modules[mod] is not None:
         reload_mods.append(mod)
         reloading['happening'] = True
 
@@ -73,14 +73,14 @@ if reload_mods:
     sys.excepthook = sys.__excepthook__
 
 mods_load_order = [
-    'ftp',
-    'ftp.commands',
-    'ftp.listenrs'
+    'aftp',
+    'aftp.commands',
+    'aftp.listenrs'
 ]
 
 mod_load_prefix = ''
 if 3 == st_version:
-    mod_load_prefix = 'FTP.'
+    mod_load_prefix = 'AFTP.'
     from imp import reload
 
 for mod in mods_load_order:
@@ -92,33 +92,33 @@ need_package_control_upgrade = False
 
 # Load dependency
 try:
-    from .ftp.commands import (
-        FtpUploadFileCommand,
-        FtpDownloadFileCommand,
-        FtpUploadFolderCommand,
-        FtpDownloadFolderCommand,
-        FtpDiffRemoteFileCommand,
-        FtpMapToRemoteCommand,
-        FtpDeleteRemoteFileCommand,
-        FtpDeleteRemoteFolderCommand
+    from .aftp.commands import (
+        AftpUploadFileCommand,
+        AftpDownloadFileCommand,
+        AftpUploadFolderCommand,
+        AftpDownloadFolderCommand,
+        AftpDiffRemoteFileCommand,
+        AftpMapToRemoteCommand,
+        AftpDeleteRemoteFileCommand,
+        AftpDeleteRemoteFolderCommand
     )
-    from .ftp.listeners import (
-        FtpAutoConnectListener
+    from .aftp.listeners import (
+        AftpAutoConnectListener
     )
 # If failure to load with try again
 except(ImportError):
-    from .ftp.commands import (
-        FtpUploadFileCommand,
-        FtpDownloadFileCommand,
-        FtpUploadFolderCommand,
-        FtpDownloadFolderCommand,
-        FtpDiffRemoteFileCommand,
-        FtpMapToRemoteCommand,
-        FtpDeleteRemoteFileCommand,
-        FtpDeleteRemoteFolderCommand
+    from .aftp.commands import (
+        AftpUploadFileCommand,
+        AftpDownloadFileCommand,
+        AftpUploadFolderCommand,
+        AftpDownloadFolderCommand,
+        AftpDiffRemoteFileCommand,
+        AftpMapToRemoteCommand,
+        AftpDeleteRemoteFileCommand,
+        AftpDeleteRemoteFolderCommand
     )
-    from .ftp.listeners import (
-        FtpAutoConnectListener
+    from .aftp.listeners import (
+        AftpAutoConnectListener
     )
 # Throw error
 except(ImportError) as e:

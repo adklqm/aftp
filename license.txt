@@ -1,0 +1,4 @@
+Sublime AFTP
+Copyright (c) Andekai <929484612@qq.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy

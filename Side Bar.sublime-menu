@@ -1,20 +1,20 @@
 [
     { "caption": "-" },
     {
-        "caption": "FTP",
+        "caption": "AFTP",
         "children":
         [
-            { "caption": "Upload File", "command": "ftp_upload_file", "args": {"paths": []} },
-            { "caption": "Download File", "command": "ftp_download_file", "args": {"paths": []} },
+            { "caption": "Upload File", "command": "aftp_upload_file", "args": {"paths": []} },
+            { "caption": "Download File", "command": "aftp_download_file", "args": {"paths": []} },
             { "caption": "-" },
-            { "caption": "Upload Folder", "command": "ftp_upload_folder", "args": {"paths": []} },
-            { "caption": "Download Folder", "command": "ftp_download_folder", "args": {"paths": []} },
+            { "caption": "Upload Folder", "command": "aftp_upload_folder", "args": {"paths": []} },
+            { "caption": "Download Folder", "command": "aftp_download_folder", "args": {"paths": []} },
             { "caption": "-" },
-            { "caption": "Diff Remote File", "command": "ftp_diff_remote_file", "args": {"paths": []} },
+            { "caption": "Diff Remote File", "command": "aftp_diff_remote_file", "args": {"paths": []} },
             { "caption": "-" },
-            { "caption": "Delete Remote File", "command": "ftp_delete_remote_file", "args": {"paths": []} },
-            { "caption": "Delete Remote Folder", "command": "ftp_delete_remote_folder", "args": {"paths": []} },
-            { "caption": "Map to Remote...", "command": "ftp_map_to_remote", "args": {"paths": []} }
+            { "caption": "Delete Remote File", "command": "aftp_delete_remote_file", "args": {"paths": []} },
+            { "caption": "Delete Remote Folder", "command": "aftp_delete_remote_folder", "args": {"paths": []} },
+            { "caption": "Map to Remote...", "command": "aftp_map_to_remote", "args": {"paths": []} }
         ]
     }
 ]
