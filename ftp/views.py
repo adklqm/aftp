@@ -1,8 +1,6 @@
 # encoding: utf-8
-
 def get_view_by_group_index(window, group, index):
     return window.views_in_group(group)[index]
-
 
 def get_all_views(window):
     views = window.views()
