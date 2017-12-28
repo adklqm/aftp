@@ -9,7 +9,8 @@
   "connect_timeout": 15,
   "ftp_passive_mode": true,
   "ignore":
-  ["ftp-config.json"
+  [
+    "ftp-config.json"
     ,".gitignore"
     ,"sftp-config.json"
     ,".git/"
