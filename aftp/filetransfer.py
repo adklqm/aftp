@@ -17,7 +17,7 @@ class FileTransfer:
         self.plugin_cache = os.path.join(sublime.cache_path(),'AFTP')
         self.conf = conf
         #Open debug,level's val with 0,1,2.
-        self.aftp.set_debuglevel(2)
+        self.aftp.set_debuglevel(0)
         #0 active mode, 1 passive
         self.aftp.set_pasv(conf['ftp_passive_mode'])
         #Connect host

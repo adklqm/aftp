@@ -3,15 +3,18 @@ import  sublime,sublime_plugin
 import  os
 from    .filetransfer import FileTransfer as FTP
 import  json
-from    ..AFTP import DEFAULT_CONFIG,DEFAULT_CONFIG_PATH
 import  threading
 
 #Instance of AFTP
-AFTP         = False
+AFTP                = False
 #It is a path for aftp-config.json
-LOCAL_PATH   = False
+LOCAL_PATH          = False
 # A json object for AFTP
-AFTP_CONFIG  = False
+AFTP_CONFIG         = False
+# A default json object for AFTP
+DEFAULT_CONFIG      = False
+#It is a path for default-aftp-config.json
+DEFAULT_CONFIG_PATH = False
 
 # Get a AFTP object
 def getAftp(path):
@@ -167,6 +170,8 @@ def valid(**args):
 def executeCommand(command,path):
     global AFTP
     global LOCAL_PATH
+    global DEFAULT_CONFIG
+    global DEFAULT_CONFIG_PATH
 
     active_window = sublime.active_window()
     log_panel     = active_window.find_output_panel('aftp')
@@ -174,6 +179,12 @@ def executeCommand(command,path):
         log_panel     = active_window.create_output_panel('aftp')
 
     active_window.run_command('show_panel',{"panel":"output.aftp"})
+
+    if False == DEFAULT_CONFIG_PATH:
+            DEFAULT_CONFIG_PATH = os.path.join( os.path.split( (os.path.split(__file__))[0] )[0],'default-aftp-config.json')
+            fp                  = open(DEFAULT_CONFIG_PATH,encoding = 'utf-8')
+            DEFAULT_CONFIG      = json.load(fp)
+            fp.close()
 
     if False == os.path.exists(os.path.join(sublime.cache_path(),'AFTP')):
         try:
@@ -483,6 +494,8 @@ class AftpDiffRemoteFileCommand(sublime_plugin.TextCommand):
 class AftpMapToRemoteCommand(sublime_plugin.TextCommand):
 
     def run(self,edit,**args):
+        global DEFAULT_CONFIG_PATH
+        global DEFAULT_CONFIG
         try:
             path = args['paths'][0]
         except Exception:
@@ -494,6 +507,11 @@ class AftpMapToRemoteCommand(sublime_plugin.TextCommand):
 
         conf_dir = os.path.join(path,'aftp-config.json')
 
+        if False == DEFAULT_CONFIG_PATH:
+            DEFAULT_CONFIG_PATH = os.path.join( os.path.split( (os.path.split(__file__))[0] )[0],'default-aftp-config.json')
+            fp                  = open(DEFAULT_CONFIG_PATH,encoding = 'utf-8')
+            DEFAULT_CONFIG      = json.load(fp)
+            fp.close()
         default_conf = open( DEFAULT_CONFIG_PATH,'rb' )
         conf = open(conf_dir,"wb")
         conf.write(default_conf.read())

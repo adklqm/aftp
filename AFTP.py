@@ -3,20 +3,7 @@ import sublime,sublime_plugin
 import os
 import re
 import sys
-import json
 import traceback
-
-# Get path of current dir. d[0] is a directory and d[1] is a file name
-dir_arr = os.path.split(__file__)
-# Get default config
-DEFAULT_CONFIG_PATH = os.path.join(dir_arr[0] + '/default-ftp-config.json')
-fp                  = open(DEFAULT_CONFIG_PATH,encoding = 'utf-8')
-DEFAULT_CONFIG      = json.load(fp)
-fp.close()
-
-# Get refer for active_window
-ACTIVE_WINDOW = sublime.active_window()
-LOG_PANEL     = ACTIVE_WINDOW.create_output_panel("aftp")
 
 # Set sublime text version
 st_version = 2
@@ -30,25 +17,6 @@ reloading = {
     'happening': False,
     'shown': False
 }
-
-# Alert error msg
-# sublime.error_message('msg')
-
-# Alert msg
-# sublime.message_dialog('msg')
-
-# Show a dialog with confirm and cancel
-# result = sublime.ok_cancel_dialog('msg','ok')
-
-# Show input panel
-# w.show_input_panel('','welcome',lambda str:sublime.error_message('ok'),lambda str:print(str),lambda:print(11))
-
-# Show a panel with quick choose
-# w.show_quick_panel('4554545',lambda chid:sublime.error_message('f'))
-
-# Set view's encode
-# view.set_encoding('UTF-8')`
-# view.encoding() == UTF-8
 
 reload_mods = []
 for mod in sys.modules:
