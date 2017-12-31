@@ -15,6 +15,8 @@ AFTP_CONFIG         = False
 DEFAULT_CONFIG      = False
 #It is a path for default-aftp-config.json
 DEFAULT_CONFIG_PATH = False
+# A command is being executed
+EXECUTING           = False
 
 # Get a AFTP object
 def getAftp(path):
@@ -99,17 +101,24 @@ def getConfig(localDir):
 
 # Get path for local directory
 def getLocalPath(path):
+    localDir = __getLocalPath(path)
+    if (False == localDir) and os.path.isdir(path):
+        if os.path.isfile(os.path.join(path,'aftp-config.json')):
+            return path
+    return localDir
+
+#Get path for local directory
+def __getLocalPath(path):
     fileDir = (os.path.split(path))[0]
     tmp     = ''
-
     for x in os.listdir(fileDir):
         tmp = os.path.join(fileDir,x)
-        if( os.path.isfile(tmp) and "aftp-config.json" == x ):
+        if (os.path.isfile(tmp)) and "aftp-config.json" == x:
             return fileDir
-
-    if(len(fileDir) < 4):
+    if (4 > len(fileDir)):
         return False
-    return getLocalPath(fileDir)
+    return __getLocalPath(fileDir)
+
 
 # Get path for remote directory
 def getRemotePath(localDir,path):
@@ -125,9 +134,13 @@ def getRemotePath(localDir,path):
     if remotePath[-1] != "/":
         remotePath = remotePath + "/"
 
-    tmp = path.replace(localDir + "\\",'')
-    tmp = tmp.replace("\\","/")
-    remotePath  = remotePath + tmp
+    if path == localDir:
+        remotePath = remotePath[0:-1]
+    else:
+        tmp = path.replace(localDir + "\\",'')
+        tmp = tmp.replace("\\","/")
+        remotePath  = remotePath + tmp
+
     return remotePath
 
 # Check command is valid
@@ -172,6 +185,7 @@ def executeCommand(command,path):
     global LOCAL_PATH
     global DEFAULT_CONFIG
     global DEFAULT_CONFIG_PATH
+    global EXECUTING
 
     active_window = sublime.active_window()
     log_panel     = active_window.find_output_panel('aftp')
@@ -180,6 +194,10 @@ def executeCommand(command,path):
 
     active_window.run_command('show_panel',{"panel":"output.aftp"})
 
+    if True == EXECUTING:
+        return False
+    EXECUTING = True
+    
     if False == DEFAULT_CONFIG_PATH:
             DEFAULT_CONFIG_PATH = os.path.join( os.path.split( (os.path.split(__file__))[0] )[0],'default-aftp-config.json')
             fp                  = open(DEFAULT_CONFIG_PATH,encoding = 'utf-8')
@@ -193,17 +211,21 @@ def executeCommand(command,path):
             log_panel.run_command('append',
                 {"characters":"Failed to create temp directory:"
                 + os.path.join(sublime.cache_path(),'AFTP')+'\n'})
+            EXECUTING = False
             return False
 
     localDir = getLocalPath(path)
     config   = getConfig(localDir)
+
     if False == config:
         log_panel.run_command('append',{"characters":"Failed to load config\n"})
+        EXECUTING = False
         return False
 
     getAftp(path)
     if False == AFTP:
-        return
+        EXECUTING = False
+        return False
 
     remote_path = getRemotePath(LOCAL_PATH,path)
     try:
@@ -211,7 +233,8 @@ def executeCommand(command,path):
             try:
                 ignore = config['ignore']
                 if os.path.split(path)[1] in ignore:
-                    return
+                    EXECUTING = False
+                    return False
             except Exception:
                 pass
             msg = 'Uploading remote file:'+remote_path+'....................................'
@@ -241,7 +264,8 @@ def executeCommand(command,path):
 
                     ignore_file = ignore_file.replace("/",os.path.sep)
                     if os.path.join(LOCAL_PATH,ignore_file) == path + os.path.sep:
-                        return
+                        EXECUTING = False
+                        return False
             msg = 'Uploading remote folder:'+remote_path+'....................................'
             log_panel.run_command('append',{"characters":msg})
             AFTP.UploadFolder(path,remote_path)
@@ -262,8 +286,11 @@ def executeCommand(command,path):
              AFTP.DiffRemoteFile(path,remote_path)
 
         log_panel.run_command('append',{"characters":'success\n'})
-
+        EXECUTING = False
     except Exception:
+    # except Exception as e:
+    #     EXECUTING = False
+    #     raise e
         if 'AftpUploadFile' == command:
             msg = '\nFailed to upload local file\n'
         if 'AftpDeleteRemoteFile'   == command:
@@ -277,6 +304,7 @@ def executeCommand(command,path):
         if 'AftpDiffRemoteFile'     == command:
             msg = '\nFailed to compare remote file\n'
         log_panel.run_command('append',{"characters":msg})
+        EXECUTING = False
 
 # A command that upload file to remote server
 class AftpUploadFileCommand(sublime_plugin.TextCommand):

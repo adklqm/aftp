@@ -17,7 +17,7 @@ class FileTransfer:
         self.plugin_cache = os.path.join(sublime.cache_path(),'AFTP')
         self.conf = conf
         #Open debug,level's val with 0,1,2.
-        self.aftp.set_debuglevel(0)
+        self.aftp.set_debuglevel(1)
         #0 active mode, 1 passive
         self.aftp.set_pasv(conf['ftp_passive_mode'])
         #Connect host
@@ -150,7 +150,7 @@ class FileTransfer:
         file_extension  = os.path.splitext(LocalDir)
         file_name       = os.path.split(LocalDir)
         tmp_file        = os.path.join(self.plugin_cache,'10xsdfs00diff'+file_extension[1])
-        diff_path       = os.path.join(self.plugin_cache,'(remote)'+file_name[1]+'---(local)'+file_name[1])
+        diff_path       = os.path.join(self.plugin_cache,'(remote)'+file_name[1]+'--(local)'+file_name[1])
 
         self.DownloadFile(tmp_file,RemoteDir)
 
@@ -208,6 +208,7 @@ class FileTransfer:
         for file in files:
             return False
         return True
+        
     #Close ftp connect
     def close( self ):
         self.aftp.quit()
