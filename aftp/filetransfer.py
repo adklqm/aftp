@@ -31,22 +31,19 @@ class FileTransfer:
     def DownloadFile( self, LocalFile, RemoteFile ):
         dir_tmp  = os.path.splitext(LocalFile)
         tmp_file = os.path.join(self.plugin_cache,'7821214dssddsd'+dir_tmp[1])
-        try:
-            file_buffer = open(tmp_file,'wb');
-        except Exception:
-            pass
+        file_buffer = open(tmp_file,'wb')
+
         try:
             self.aftp.retrbinary( "RETR %s" % ( RemoteFile ), file_buffer.write )
             file_buffer.close()
-        except Exception:
-            pass
 
-        file_buffer  = open(tmp_file,'rb');
-        file_handler = open( LocalFile, 'wb' )
-        file_handler.write(file_buffer.read())
-        file_handler.close()
-        file_buffer.close()
-        return True
+            file_buffer  = open(tmp_file,'rb');
+            file_handler = open( LocalFile, 'wb' )
+            file_handler.write(file_buffer.read())
+            file_handler.close()
+            file_buffer.close()
+        except Exception:
+            file_buffer.close()
 
     #Upload a file to remote's server
     def UploadFile( self, LocalFile, RemoteFile ):

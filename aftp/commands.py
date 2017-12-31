@@ -244,7 +244,7 @@ def executeCommand(command,path):
         if 'AftpDownloadFile' == command:
             msg = 'Downloading remote file:'+remote_path+'....................................'
             log_panel.run_command('append',{"characters":msg})
-            AFTP.UploadFile(path,remote_path)
+            AFTP.DownloadFile(path,remote_path)
 
         if 'AftpDeleteRemoteFile' == command:
             msg = 'Deleting remote file'+remote_path+'.......................................'
@@ -293,6 +293,8 @@ def executeCommand(command,path):
     #     raise e
         if 'AftpUploadFile' == command:
             msg = '\nFailed to upload local file\n'
+        if 'AftpDownloadFile' == command:
+            msg = '\nFailed to download remote file\n'
         if 'AftpDeleteRemoteFile'   == command:
             msg = '\nFailed to delete remote file\n'
         if 'AftpUploadFolder'       == command:
@@ -305,6 +307,7 @@ def executeCommand(command,path):
             msg = '\nFailed to compare remote file\n'
         log_panel.run_command('append',{"characters":msg})
         EXECUTING = False
+
 
 # A command that upload file to remote server
 class AftpUploadFileCommand(sublime_plugin.TextCommand):
